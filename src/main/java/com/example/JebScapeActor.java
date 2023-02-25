@@ -26,6 +26,7 @@ package com.example;
 
 import net.runelite.api.*;
 import net.runelite.api.coords.LocalPoint;
+import net.runelite.api.coords.WorldArea;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ClientTick;
 
@@ -154,7 +155,8 @@ public class JebScapeActor
 	{
 		return targetQueueSize > 0 ? targetQueue[currentTargetIndex].worldDestinationPosition : WorldPoint.fromLocal(client, rlObject.getLocation());
 	}
-	
+
+
 	public LocalPoint getLocalLocation()
 	{
 		return rlObject.getLocation();
@@ -327,14 +329,14 @@ public class JebScapeActor
 				WorldPoint midPoint = new WorldPoint(prevWorldPosition.getX() + dx, prevWorldPosition.getY() + dy, prevWorldPosition.getPlane());
 				
 				// handle rotation if we have no interacting target
-				if (!isInteracting)
-				{
-					// the actor needs to look in the direction being moved toward
-					// the distance between these points should be guaranteed to be 1 here
-					dx = midPoint.getX() - prevWorldPosition.getX();
-					dy = midPoint.getY() - prevWorldPosition.getY();
-					jauOrientation = JAU_DIRECTIONS_5X5[CENTER_INDEX_5X5 - dy][CENTER_INDEX_5X5 + dx];
-				}
+//				if (!isInteracting)
+//				{
+//					// the actor needs to look in the direction being moved toward
+//					// the distance between these points should be guaranteed to be 1 here
+//					dx = midPoint.getX() - prevWorldPosition.getX();
+//					dy = midPoint.getY() - prevWorldPosition.getY();
+//					jauOrientation = JAU_DIRECTIONS_5X5[CENTER_INDEX_5X5 - dy][CENTER_INDEX_5X5 + dx];
+//				}
 				
 				this.targetQueue[newTargetIndex].worldDestinationPosition = midPoint;
 				this.targetQueue[newTargetIndex].localDestinationPosition = LocalPoint.fromWorld(client, midPoint);
@@ -350,14 +352,14 @@ public class JebScapeActor
 			}
 			
 			// handle rotation if we have no interacting target
-			if (!isInteracting)
-			{
-				// the actor needs to look in the direction being moved toward
-				// the distance between these points may be up to 2
-				dx = worldPosition.getX() - prevWorldPosition.getX();
-				dy = worldPosition.getY() - prevWorldPosition.getY();
-				jauOrientation = JAU_DIRECTIONS_5X5[CENTER_INDEX_5X5 - dy][CENTER_INDEX_5X5 + dx];
-			}
+//			if (!isInteracting)
+//			{
+//				// the actor needs to look in the direction being moved toward
+//				// the distance between these points may be up to 2
+//				dx = worldPosition.getX() - prevWorldPosition.getX();
+//				dy = worldPosition.getY() - prevWorldPosition.getY();
+//				jauOrientation = JAU_DIRECTIONS_5X5[CENTER_INDEX_5X5 - dy][CENTER_INDEX_5X5 + dx];
+//			}
 		}
 		
 		this.targetQueue[newTargetIndex].worldDestinationPosition = worldPosition;
@@ -378,6 +380,9 @@ public class JebScapeActor
 			if (remainingOverheadChatMessageTime == 0 && !chatMessage.isEmpty())
 				this.chatMessage = "";
 		}
+
+
+
 	}
 
 

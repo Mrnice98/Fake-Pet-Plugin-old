@@ -148,7 +148,7 @@ public class JebScapeActor
 	{
 		this.animationPoses[POSE_ANIM.IDLE.ordinal()] = client.loadAnimation(7125);//1678
 		this.animationPoses[POSE_ANIM.WALK.ordinal()] = client.loadAnimation(7124);//7974
-//		this.animationPoses[POSE_ANIM.RUN.ordinal()] = client.loadAnimation(actor.getRunAnimation());
+		this.animationPoses[POSE_ANIM.RUN.ordinal()] = client.loadAnimation(7124);
 	}
 	
 	public WorldPoint getWorldLocation()
@@ -418,7 +418,7 @@ public class JebScapeActor
 				{
 					int speed = targetQueue[currentTargetIndex].tileMovementSpeed;
 					// we don't want to go beyond run (speed of 2)
-					rlObject.setAnimation(speed > 2 ? null : animationPoses[speed]);
+					rlObject.setAnimation(speed > 2 ? null : animationPoses[1]); //set amimation poses to walk / run by calling it from the array to stop it nulling out
 					this.currentAnimationID = -1;
 				}
 

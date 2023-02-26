@@ -10,8 +10,11 @@ import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.*;
 import net.runelite.api.geometry.SimplePolygon;
 import net.runelite.api.model.Jarvis;
+import net.runelite.api.widgets.*;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.game.chatbox.ChatboxPanelManager;
+import net.runelite.client.menus.MenuManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -56,12 +59,47 @@ public class ExamplePlugin extends Plugin
 		log.info("Example stopped!");
 	}
 
+
+	WorldPoint lastPlayerWP;
+	WorldPoint lastActorWP;
+	int lastActorOrientation;
+
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged gameStateChanged)
 	{
+		System.out.println(gameStateChanged.getGameState());
+		if (gameStateChanged.getGameState() == GameState.LOADING)
+		{
+			lastPlayerWP = client.getLocalPlayer().getWorldLocation();
+			lastActorWP = actor.getWorldLocation();
+			lastActorOrientation = actor.getOrientation();
+
+			System.out.println(client.getLocalPlayer().getWorldLocation());
+			actor.despawn();
+		}
+
 		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
 		{
-			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "Example says " + config.greeting(), null);
+
+			System.out.println(lastPlayerWP.distanceTo(client.getLocalPlayer().getWorldLocation()));
+			WorldPoint wp = client.getLocalPlayer().getWorldLocation();
+			WorldPoint aWP = actor.getWorldLocation();
+
+			double intx = aWP.toWorldArea().getX() - wp.toWorldArea().getX();
+			double inty = aWP.toWorldArea().getY() - wp.toWorldArea().getY();
+
+			if (lastPlayerWP.distanceTo(client.getLocalPlayer().getWorldLocation()) < 5)
+			{
+				actor.spawn(lastActorWP,lastActorOrientation);
+				actor.setAnimation(actor.animationPoses[0]);
+			}
+			else
+			{
+				actor.spawn(getPathOutWorldPoint(client.getLocalPlayer().getWorldArea()),radToJau(Math.atan2(intx,inty)));
+				actor.setAnimation(actor.animationPoses[0]);
+			}
+
+
 		}
 	}
 
@@ -78,14 +116,61 @@ public class ExamplePlugin extends Plugin
 
 		if (event.getScriptId() == ScriptID.CHAT_SEND)
 		{
-			System.out.println("ran");
+
 		}
 
 	}
 
+
+	@Inject
+	ChatboxThing chatboxThing;
+
 	@Subscribe
 	public void onChatMessage(ChatMessage event)
 	{
+		if (event.getMessage().equals("!S"))
+		{
+
+			client.getWidget(WidgetInfo.CHATBOX_CONTAINER).deleteAllChildren();
+			client.getWidget(WidgetInfo.CHATBOX_CONTAINER).createChild(-1,WidgetType.TEXT).setText("TEst").revalidate();
+
+
+			//chatboxPanelManager.openTextMenuInput("test").option("option",null).build();
+
+			//chatboxThing.createThing();
+
+
+
+//			Widget container = client.getWidget(162,34);
+//			container.deleteAllChildren();
+//
+//			Widget promptWidget = container.createChild(0, WidgetType.TEXT);
+//			promptWidget.setText("this prompt");
+//			promptWidget.setTextColor(0x800000);
+//			promptWidget.setFontId(FontID.BARBARIAN);
+//			promptWidget.setXPositionMode(WidgetPositionMode.ABSOLUTE_CENTER);
+//			promptWidget.setOriginalX(0);
+//			promptWidget.setYPositionMode(WidgetPositionMode.ABSOLUTE_TOP);
+//			promptWidget.setOriginalY(8);
+//			promptWidget.setOriginalHeight(24);
+//			promptWidget.setXTextAlignment(WidgetTextAlignment.CENTER);
+//			promptWidget.setYTextAlignment(WidgetTextAlignment.CENTER);
+//			promptWidget.setWidthMode(WidgetSizeMode.MINUS);
+//			promptWidget.revalidate();
+
+
+
+
+
+
+		}
+
+		if (event.getMessage().equals("!Go"))
+		{
+
+		}
+
+
 		String message = event.getMessage();
 		if (message.equals("You do not have a follower.") && event.getType() == ChatMessageType.GAMEMESSAGE)
 		{
@@ -108,11 +193,11 @@ public class ExamplePlugin extends Plugin
 
 			event.getMessageNode().setValue("");
 
-
-			actor.moveTo(wp,radToJau(Math.atan2(intx,inty)),-1,true,true);
-
+			actor.spawn(getPathOutWorldPoint(client.getLocalPlayer().getWorldArea()),radToJau(Math.atan2(intx,inty)));
+			actor.setAnimation(actor.animationPoses[0]); //0 == walk
 
 		}
+
 
 
 
@@ -146,6 +231,9 @@ public class ExamplePlugin extends Plugin
 	}
 
 
+	private ChatboxPanelManager chatboxPanelManager;
+
+	private MenuManager menuManager;
 
 
 	@Subscribe
@@ -158,10 +246,14 @@ public class ExamplePlugin extends Plugin
 
 		if (nextTravellingPoint == null && client.getLocalPlayer().getLocalLocation().equals(actor.getLocalLocation()))
 		{
-			nextTravellingPoint = new WorldArea(getPathOutWorldPoint(),1,1);
+			nextTravellingPoint = new WorldArea(getPathOutWorldPoint(actor.getWorldLocation().toWorldArea()),1,1);
 		}
 
-		actor.moveTo(nextTravellingPoint.toWorldPoint(), radToJau(Math.atan2(intx,inty)),-1,true,true);//7974 radToJau(Math.atan2(intx,inty))
+		if (actor.isActive())
+		{
+			actor.moveTo(nextTravellingPoint.toWorldPoint(), radToJau(Math.atan2(intx,inty)),-1,true,true);//7974 radToJau(Math.atan2(intx,inty))
+		}
+
 		//1678
 
 	}
@@ -212,9 +304,9 @@ public class ExamplePlugin extends Plugin
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked event)
 	{
-		if (event.getMenuTarget().equals("Abyssal orphan") && event.getMenuOption().equals("Pick-up"))
+		if (event.getMenuTarget().contains("Abyssal orphan") && event.getMenuOption().equals("Pick-up"))
 		{
-			if (actor.isActive())
+			if (actor.isActive() && actor.getWorldLocation().toWorldArea().isInMeleeDistance(client.getLocalPlayer().getWorldArea()))
 			{
 				actor.despawn();
 			}
@@ -231,11 +323,9 @@ public class ExamplePlugin extends Plugin
 	}
 
 
-	public WorldPoint getPathOutWorldPoint()
+	public WorldPoint getPathOutWorldPoint(WorldArea worldArea)
 	{
-		System.out.println("ran");
 
-		WorldArea worldArea = actor.getWorldLocation().toWorldArea();
 		ArrayList<WorldPoint> points = new ArrayList<>();
 
 		for (int i = -1; i < 2; i++)
@@ -244,11 +334,11 @@ public class ExamplePlugin extends Plugin
 			{
 				if (worldArea.canTravelInDirection(client,i,0))
 				{
-					points.add(new WorldPoint(actor.getWorldLocation().getX() + i,actor.getWorldLocation().getY(),client.getPlane()));
+					points.add(new WorldPoint(worldArea.getX() + i,worldArea.getY(),client.getPlane()));
 				}
 				if (worldArea.canTravelInDirection(client,0,i))
 				{
-					points.add(new WorldPoint(actor.getWorldLocation().getX(),actor.getWorldLocation().getY() + i,client.getPlane()));
+					points.add(new WorldPoint(worldArea.getX(),worldArea.getY() + i,client.getPlane()));
 				}
 			}
 		}
@@ -270,16 +360,26 @@ public class ExamplePlugin extends Plugin
 	{
 		if (actor != null)
 		{
+//
+//			WorldArea worldArea = new WorldArea(WorldPoint.fromLocalInstance(client,actor.getLocalLocation()),1,1);
+//			WorldArea worldArea1 = new WorldArea(WorldPoint.fromLocalInstance(client,client.getLocalPlayer().getLocalLocation()),1,1);
+
+			WorldArea worldArea = new WorldArea(WorldPoint.fromLocal(client,actor.getLocalLocation()),1,1);
+			WorldArea worldArea1 = new WorldArea(WorldPoint.fromLocal(client,client.getLocalPlayer().getLocalLocation()),1,1);
 
 
-			WorldArea worldArea = actor.getWorldLocation().toWorldArea();
-			WorldArea worldArea1 = new WorldArea(WorldPoint.fromLocalInstance(client,client.getLocalPlayer().getLocalLocation()),1,1);
 			LocalPoint lp = actor.getLocalLocation();
+
+//			System.out.println(worldArea.getX() + " " + worldArea.getY());
+//			System.out.println(worldArea1.getX() + " " + worldArea1.getY());
 
 			int zOff = Perspective.getTileHeight(client,lp,client.getPlane());
 			poly = calculateAABB(client,actor.getRlObject().getModel(),actor.getOrientation(),actor.getLocalLocation().getX(),actor.getLocalLocation().getY(),client.getPlane(), zOff);
 
+
+
 			nextTravellingPoint = worldArea.calculateNextTravellingPoint(client,worldArea1,true);
+			//System.out.println(nextTravellingPoint);
 
 			if (nextTravellingPoint == null && client.getLocalPlayer().getLocalLocation().equals(actor.getLocalLocation()))
 			{
@@ -322,17 +422,13 @@ public class ExamplePlugin extends Plugin
 //						}
 //					}
 //
-//
-				//nextTravellingPoint = new WorldArea(getPathOutWorldPoint(),1,1);
+              //nextTravellingPoint = new WorldArea(getPathOutWorldPoint(actor.getWorldLocation().toWorldArea()),1,1);
 
 			}
 		//	System.out.println(nextTravellingPoint.isInMeleeDistance(client.getLocalPlayer().getWorldArea()));
 			actor.onClientTick(event);
-			System.out.println(actor.getRlObject().getAnimation().getId());
-			if (actor.getRlObject().getAnimation().getId() == 7125)
-			{
-				actor.getRlObject().setAnimation(client.loadAnimation(7124));
-			}
+			//System.out.println(actor.getRlObject().getAnimation().getId());
+
 		}
 	}
 

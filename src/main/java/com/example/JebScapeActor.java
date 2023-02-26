@@ -156,6 +156,13 @@ public class JebScapeActor
 		return targetQueueSize > 0 ? targetQueue[currentTargetIndex].worldDestinationPosition : WorldPoint.fromLocal(client, rlObject.getLocation());
 	}
 
+	public void setAnimation(Animation animation)
+	{
+		rlObject.setAnimation(animation);
+	}
+
+
+
 
 	public LocalPoint getLocalLocation()
 	{
@@ -418,7 +425,13 @@ public class JebScapeActor
 				{
 					int speed = targetQueue[currentTargetIndex].tileMovementSpeed;
 					// we don't want to go beyond run (speed of 2)
-					rlObject.setAnimation(speed > 2 ? null : animationPoses[1]); //set amimation poses to walk / run by calling it from the array to stop it nulling out
+					rlObject.setAnimation(speed > 2 ? null : animationPoses[speed]);//set amimation poses to walk / run by calling it from the array to stop it breaking
+
+					if (rlObject.getAnimation() == null)
+					{
+						rlObject.setAnimation(animationPoses[1]);
+					}
+
 					this.currentAnimationID = -1;
 				}
 
@@ -446,10 +459,10 @@ public class JebScapeActor
 						animationStall--;
 					}
 					
-					//if (animationStall == 0)
+					if (animationStall == 0)
 					{
 						// compute the number of local points to move this tick
-						//= currentMovementSpeed * movementPerClientTick
+						//=
 						int speed = 4;
 
 						if (speed > 0)

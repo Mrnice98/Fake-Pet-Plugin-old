@@ -30,6 +30,8 @@ import net.runelite.api.coords.WorldArea;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ClientTick;
 
+import javax.inject.Inject;
+
 public class JebScapeActor
 {
 	private Client client;
@@ -146,8 +148,8 @@ public class JebScapeActor
 	
 	public void setPoseAnimations()
 	{
-		this.animationPoses[POSE_ANIM.IDLE.ordinal()] = client.loadAnimation(7125);//1678
-		this.animationPoses[POSE_ANIM.WALK.ordinal()] = client.loadAnimation(7124);//7974
+		this.animationPoses[POSE_ANIM.IDLE.ordinal()] = client.loadAnimation(7125);//7125
+		this.animationPoses[POSE_ANIM.WALK.ordinal()] = client.loadAnimation(7124);//7124
 		this.animationPoses[POSE_ANIM.RUN.ordinal()] = client.loadAnimation(7124);
 	}
 	
@@ -178,34 +180,7 @@ public class JebScapeActor
 	{
 		return rlObject.getOrientation();
 	}
-	
-	public void setWorld(int world)
-	{
-		this.world = world;
-	}
-	
-	public int getWorld()
-	{
-		return world;
-	}
-	
-	public void setName(String name)
-	{
-		this.actorName = name;
-		
-		if (world != 0)
-			overheadText = "[W" + world + "] ";
-		else
-			overheadText = "";
-		
-		overheadText += name;
-	}
-	
-	public String getName()
-	{
-		return actorName;
-	}
-	
+
 	public String getOverheadText()
 	{
 		return overheadText;
@@ -231,6 +206,7 @@ public class JebScapeActor
 	// jauOrientation is not used if isInteracting is false; it will instead default to the angle being moved towards
 	public void moveTo(WorldPoint worldPosition, int jauOrientation, int primaryAnimationID, boolean isInteracting, boolean isPoseAnimation)
 	{
+
 		// respawn this actor if it was previously despawned
 		if (!rlObject.isActive())
 			spawn(worldPosition, jauOrientation);
@@ -393,6 +369,8 @@ public class JebScapeActor
 	}
 
 
+	@Inject
+	ExamplePlugin plugin;
 
 	// onClientTick() updates the per-frame state needed for rendering actor movement
 	public boolean onClientTick(ClientTick clientTick)
@@ -516,7 +494,9 @@ public class JebScapeActor
 
 					dJau = (targetOrientation - newOrientation) % JAU_FULL_ROTATION;
 				}
-				
+
+
+
 				// have we arrived at our target?
 				if (dx == 0 && dy == 0 && dJau == 0)
 				{

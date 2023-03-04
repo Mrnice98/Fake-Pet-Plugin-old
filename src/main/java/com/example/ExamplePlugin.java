@@ -24,7 +24,7 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.example.JebScapeActor.radToJau;
+import static com.example.ObjectModel.radToJau;
 import static net.runelite.api.Perspective.COSINE;
 import static net.runelite.api.Perspective.SINE;
 
@@ -113,7 +113,7 @@ public class ExamplePlugin extends Plugin
 	}
 
 
-	JebScapeActor pet = new JebScapeActor();
+	ObjectModel pet = new ObjectModel();
 	WorldArea nextTravellingPoint;
 	Model petModel;
 
@@ -134,7 +134,7 @@ public class ExamplePlugin extends Plugin
 	@Inject
 	ChatboxThing chatboxThing;
 
-	JebScapeActor wizard = new JebScapeActor();
+	ObjectModel wizard = new ObjectModel();
 
 	//add thing to handle hopping, when you hop your pet teles too you
 
@@ -219,7 +219,7 @@ public class ExamplePlugin extends Plugin
 
 			WorldPoint point = new WorldPoint(client.getLocalPlayer().getWorldLocation().getX() ,client.getLocalPlayer().getWorldLocation().getY(),client.getPlane());
 
-			pet.moveTo(point,radToJau(Math.atan2(intx,inty)),1678,true,false);
+			pet.moveTo(point,radToJau(Math.atan2(intx,inty)));
 
 		}
 
@@ -340,7 +340,7 @@ public class ExamplePlugin extends Plugin
 
 		if (pet.isActive() && nextTravellingPoint != null && !cutScene)
 		{
-			pet.moveTo(nextTravellingPoint.toWorldPoint(), radToJau(Math.atan2(intx,inty)),-1,true,true);
+			pet.moveTo(nextTravellingPoint.toWorldPoint(), radToJau(Math.atan2(intx,inty)));
 		}
 
 

@@ -14,9 +14,9 @@ import java.awt.*;
 public class OverlayPet extends Overlay
 {
 
-    ExamplePlugin plugin;
+    private ExamplePlugin plugin;
 
-    Client client;
+    private Client client;
 
     @Inject
     public OverlayPet(ExamplePlugin plugin, Client client)

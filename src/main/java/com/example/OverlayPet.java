@@ -4,7 +4,6 @@ import net.runelite.api.Client;
 import net.runelite.api.Perspective;
 import net.runelite.api.Point;
 import net.runelite.api.coords.LocalPoint;
-import net.runelite.api.coords.WorldArea;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.overlay.*;
@@ -33,7 +32,7 @@ public class OverlayPet extends Overlay
     public Dimension render(Graphics2D graphics)
     {
 
-        if (plugin.actor.isActive() && plugin.nextTravellingPoint != null && plugin.poly != null)
+        if (plugin.pet != null && plugin.pet.isActive() && plugin.nextTravellingPoint != null && plugin.poly != null)
         {
             if (plugin.poly.contains(client.getMouseCanvasPosition().getX(),client.getMouseCanvasPosition().getY()))
             {
@@ -57,8 +56,11 @@ public class OverlayPet extends Overlay
             graphics.setFont(FontManager.getRunescapeBoldFont());
 
 
-            Point canvasPoint2 = Perspective.getCanvasTextLocation(client,graphics,plugin.actor.getLocalLocation(),"BLAMMMOOOOOOOOOOO",plugin.actor.getRlObject().getModelHeight());
-            OverlayUtil.renderTextLocation(graphics,canvasPoint2,"BLAMMMOOOOOOOOOOO",Color.YELLOW);
+            if (plugin.wizard.getRlObject() != null && plugin.cutScene)
+            {
+                Point canvasPoint2 = Perspective.getCanvasTextLocation(client,graphics,plugin.wizard.getLocalLocation(),plugin.message,plugin.wizard.getRlObject().getModelHeight() + 45);
+                OverlayUtil.renderTextLocation(graphics,canvasPoint2,plugin.message,Color.YELLOW);
+            }
 
 
 

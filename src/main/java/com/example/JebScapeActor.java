@@ -119,8 +119,6 @@ public class JebScapeActor
 		else
 			rlObject.setLocation(new LocalPoint(0, 0), client.getPlane());
 
-		setPoseAnimations();
-
 		rlObject.setOrientation(jauOrientation);
 
 		rlObject.setShouldLoop(true);
@@ -146,11 +144,11 @@ public class JebScapeActor
 		this.remainingOverheadChatMessageTime = 0;
 	}
 	
-	public void setPoseAnimations()
+	public void setPoseAnimations(int idle, int walk, int run)
 	{
-		this.animationPoses[POSE_ANIM.IDLE.ordinal()] = client.loadAnimation(7125);//7125
-		this.animationPoses[POSE_ANIM.WALK.ordinal()] = client.loadAnimation(7124);//7124
-		this.animationPoses[POSE_ANIM.RUN.ordinal()] = client.loadAnimation(7124);
+		this.animationPoses[POSE_ANIM.IDLE.ordinal()] = client.loadAnimation(idle);//7125
+		this.animationPoses[POSE_ANIM.WALK.ordinal()] = client.loadAnimation(walk);//7124
+		this.animationPoses[POSE_ANIM.RUN.ordinal()] = client.loadAnimation(run);
 	}
 	
 	public WorldPoint getWorldLocation()
@@ -368,9 +366,40 @@ public class JebScapeActor
 
 	}
 
+	public void rotateObject(double intx, double inty)
+	{
+
+		final int JAU_FULL_ROTATION = 2048;
+		int targetOrientation = radToJau(Math.atan2(intx, inty));
+		int currentOrientation = rlObject.getOrientation();
+
+		int dJau = (targetOrientation - currentOrientation) % JAU_FULL_ROTATION;
+
+		if (dJau != 0)
+		{
+			final int JAU_HALF_ROTATION = 1024;
+			final int JAU_TURN_SPEED = 32; //32
+			int dJauCW = Math.abs(dJau);
+
+			if (dJauCW > JAU_HALF_ROTATION) // use the shortest turn
+				dJau = (currentOrientation - targetOrientation) % JAU_FULL_ROTATION;
+			else if (dJauCW == JAU_HALF_ROTATION) // always turn right when turning around
+				dJau = dJauCW;
+
+			// only use the delta if it won't send up past the target
+			if (Math.abs(dJau) > JAU_TURN_SPEED)
+				dJau = Integer.signum(dJau) * JAU_TURN_SPEED;
+
+			int newOrientation = (JAU_FULL_ROTATION + rlObject.getOrientation() + dJau) % JAU_FULL_ROTATION;
+
+			rlObject.setOrientation(newOrientation);
+
+		}
+	}
+
 
 	@Inject
-	ExamplePlugin plugin;
+	private ExamplePlugin plugin;
 
 	// onClientTick() updates the per-frame state needed for rendering actor movement
 	public boolean onClientTick(ClientTick clientTick)

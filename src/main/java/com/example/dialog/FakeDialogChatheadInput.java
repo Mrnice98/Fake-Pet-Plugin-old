@@ -1,12 +1,10 @@
 package com.example.dialog;
 
 import com.google.common.base.Strings;
-import javax.inject.Inject;
-import lombok.NonNull;
-import lombok.Setter;
+import java.util.function.IntConsumer;
+import lombok.RequiredArgsConstructor;
 import net.runelite.api.Client;
 import net.runelite.api.FontID;
-import net.runelite.api.events.GameTick;
 import net.runelite.api.widgets.JavaScriptCallback;
 import net.runelite.api.widgets.Widget;
 import net.runelite.api.widgets.WidgetModelType;
@@ -14,11 +12,11 @@ import net.runelite.api.widgets.WidgetPositionMode;
 import net.runelite.api.widgets.WidgetSizeMode;
 import net.runelite.api.widgets.WidgetTextAlignment;
 import net.runelite.api.widgets.WidgetType;
-import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.chatbox.ChatboxInput;
 import net.runelite.client.game.chatbox.ChatboxPanelManager;
 
-public class FakePetDialog extends ChatboxInput
+@RequiredArgsConstructor
+public class FakeDialogChatheadInput extends ChatboxInput
 {
 
 	private static final int COLOUR_TITLE = 0x800000;
@@ -33,25 +31,10 @@ public class FakePetDialog extends ChatboxInput
 	private static final int TEXT_LINE_HEIGHT = 17;
 	private static final int TEXT_BLOCK_HEIGHT = 67;
 
-	@Inject
-	private Client client;
-
-	@Inject
-	private ChatboxPanelManager chatboxPanelManager;
-
-	private DialogNode currentNode;
-
-	@Setter
-	private boolean queuedClose = false;
-	private boolean queuedAdvance = false;
-
-	public void open(@NonNull DialogNode startNode)
-	{
-		this.currentNode = startNode;
-		this.queuedAdvance = false;
-		this.queuedClose = false;
-		chatboxPanelManager.openInput(this);
-	}
+	private final Client client;
+	private final ChatboxPanelManager chatboxPanelManager;
+	private final DialogNode currentNode;
+	private final IntConsumer onSelected;
 
 	@Override
 	protected void open()
@@ -156,7 +139,7 @@ public class FakePetDialog extends ChatboxInput
 		{
 			continueWidget.setText("Please wait...");
 			continueWidget.setTextColor(COLOUR_CONTINUE);
-			queuedAdvance = true;
+			onSelected.accept(0);
 		};
 
 		continueWidget.setAction(0, "Continue");
@@ -173,34 +156,5 @@ public class FakePetDialog extends ChatboxInput
 		continueWidget.setHasListener(true);
 
 		continueWidget.revalidate();
-	}
-
-	// dialog boxes only update once per game tick
-	// so we intentionally delay until the next tick to fake server delay
-	@Subscribe
-	public void onGameTick(GameTick _e)
-	{
-		if (queuedClose)
-		{
-			chatboxPanelManager.close();
-			return;
-		}
-
-		if (queuedAdvance)
-		{
-			queuedAdvance = false;
-			DialogNode next = this.currentNode.getNext();
-			if (next == DialogNode.TERMINAL)
-			{
-				if (chatboxPanelManager.getCurrentInput() == this)
-				{
-					chatboxPanelManager.close();
-				}
-			}
-			else if (next != null)
-			{
-				this.open(next);
-			}
-		}
 	}
 }

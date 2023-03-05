@@ -1,7 +1,7 @@
 package com.example;
 
 import com.example.dialog.DialogProvider;
-import com.example.dialog.FakePetDialog;
+import com.example.dialog.FakeDialogManager;
 import com.google.inject.Provides;
 import javax.inject.Inject;
 
@@ -14,6 +14,7 @@ import net.runelite.api.events.*;
 import net.runelite.api.geometry.SimplePolygon;
 import net.runelite.api.model.Jarvis;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -38,6 +39,9 @@ public class ExamplePlugin extends Plugin
 	private Client client;
 
 	@Inject
+	private EventBus eventBus;
+
+	@Inject
 	private ExampleConfig config;
 
 	@Inject
@@ -46,10 +50,17 @@ public class ExamplePlugin extends Plugin
 	@Inject
 	private OverlayPet overlayPet;
 
+	@Inject
+	private DialogProvider dialogProvider;
+
+	@Inject
+	private FakeDialogManager fakeDialogManager;
+
 	@Override
 	protected void startUp() throws Exception
 	{
 		overlayManager.add(overlayPet);
+		eventBus.register(fakeDialogManager);
 		log.info("Example started!");
 	}
 
@@ -57,6 +68,7 @@ public class ExamplePlugin extends Plugin
 	protected void shutDown() throws Exception
 	{
 		overlayManager.remove(overlayPet);
+		eventBus.register(fakeDialogManager);
 		log.info("Example stopped!");
 	}
 
@@ -416,13 +428,6 @@ public class ExamplePlugin extends Plugin
 
 	}
 
-
-	@Inject
-	private DialogProvider dialogProvider;
-
-	@Inject
-	private FakePetDialog fakePetDialog;
-
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked event)
 	{
@@ -440,10 +445,7 @@ public class ExamplePlugin extends Plugin
 		{
 			if (pet.isActive() && pet.getWorldLocation().toWorldArea().isInMeleeDistance(client.getLocalPlayer().getWorldArea()))
 			{
-
-				fakePetDialog.open(dialogProvider.CALL_THE_WIZARD);
-
-
+				fakeDialogManager.open(dialogProvider.ABYSSAL_ORPHAN);
 			}
 
 		}

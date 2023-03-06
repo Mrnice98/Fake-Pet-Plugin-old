@@ -128,7 +128,7 @@ public class FakeDialogChoiceInput extends ChatboxInput implements KeyListener
 	public void keyPressed(KeyEvent e)
 	{
 		int ix = e.getKeyCode() - '1';
-		if (ix < optionWidgets.size())
+		if (ix >= 0 && ix < optionWidgets.size())
 		{
 			queueAdvance(ix);
 		}

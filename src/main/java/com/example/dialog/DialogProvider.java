@@ -40,7 +40,7 @@ public class DialogProvider
 		DialogNode.builder()
 			.player()
 			.animationId(PLAYER_TALK_1)
-			.body("Finally after 1800 tires ive got you.")
+			.body("Finally after 1800 tires i've got you.")
 			.onContinue
 		(() ->
 

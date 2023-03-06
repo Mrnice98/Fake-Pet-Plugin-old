@@ -57,12 +57,15 @@ public class ExamplePlugin extends Plugin
 	@Inject
 	private FakeDialogManager fakeDialogManager;
 
+	@Inject
+	private ChatboxPanelManager chatboxPanelManager;
+
 	@Override
 	protected void startUp() throws Exception
 	{
 		overlayManager.add(overlayPet);
 		eventBus.register(fakeDialogManager);
-		log.info("Example started!");
+
 	}
 
 	@Override
@@ -70,19 +73,40 @@ public class ExamplePlugin extends Plugin
 	{
 		overlayManager.remove(overlayPet);
 		eventBus.register(fakeDialogManager);
-		log.info("Example stopped!");
+
 	}
 
+	@Provides
+	ExampleConfig provideConfig(ConfigManager configManager)
+	{
+		return configManager.getConfig(ExampleConfig.class);
+	}
 
-	int delayForHouse;
+	private int lastActorOrientation;
+	public int gameTickCutSceneStart;
 
-	WorldPoint lastPlayerWP;
-	WorldPoint lastActorWP;
-	int lastActorOrientation;
+	public String message;
 
-	boolean petFollowing = false;
+	private boolean dialogOpen;
+	private boolean petFollowing = false;
+	private boolean petEnterHouse;
+	public boolean cutScene = false;
 
-	boolean petEnterHouse;
+	public ObjectModel pet = new ObjectModel();
+	public ObjectModel wizard = new ObjectModel();
+
+	private WorldPoint lastPlayerWP;
+	private WorldPoint lastActorWP;
+
+	public WorldArea nextTravellingPoint;
+	private WorldArea petWorldArea = null;
+
+	private Model petModel;
+
+	private final List<WorldPoint> prevPlayerWPs = new ArrayList<>();
+
+	public SimplePolygon poly;
+
 
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged gameStateChanged)
@@ -131,11 +155,6 @@ public class ExamplePlugin extends Plugin
 	}
 
 
-	ObjectModel pet = new ObjectModel();
-	WorldArea nextTravellingPoint;
-	Model petModel;
-
-	int tickdealy;
 
 	@Subscribe
 	public void onScriptPostFired(ScriptPostFired event)
@@ -149,10 +168,8 @@ public class ExamplePlugin extends Plugin
 	}
 
 
-	@Inject
-	ChatboxThing chatboxThing;
 
-	public ObjectModel wizard = new ObjectModel();
+
 
 	//add thing to handle hopping, when you hop your pet teles too you
 
@@ -161,125 +178,18 @@ public class ExamplePlugin extends Plugin
 	{
 
 		String message = event.getMessage();
+
+		if (cutScene)
+		{
+			return;
+		}
+
 		if (message.equals("You do not have a follower.") && event.getType() == ChatMessageType.GAMEMESSAGE)
 		{
-			if (pet.getRlObject() == null || !pet.isActive())
-			{
-
-				ModelData modelData = client.loadModelData(29631).cloneVertices();//29631 //39196
-				//modelData.scale(30,30,30);
-				petModel = modelData.light();
-
-				pet.init(client);
-				pet.setPoseAnimations(7125,7124,7124);
-				pet.setModel(petModel);
-
-//				actor.getRlObject().setDrawFrontTilesFirst(true);
-//				actor.getRlObject().setRadius(1);
-
-			}
-
-			WorldPoint wp = client.getLocalPlayer().getWorldLocation();
-			WorldPoint aWP = pet.getWorldLocation();
-
-			boolean petHasLOS = wp.toWorldArea().hasLineOfSightTo(client,aWP);
-
-			if (wp.toWorldArea().distanceTo(aWP.toWorldArea()) < 6 && petHasLOS && pet.isActive())
-			{
-				event.getMessageNode().setValue("Your follower is already close enough.");
-				//return;
-			}
-			else if (pet.isActive())
-			{
-				pet.despawn();
-			}
-
-
-			double intx = aWP.toWorldArea().getX() - wp.toWorldArea().getX();
-			double inty = aWP.toWorldArea().getY() - wp.toWorldArea().getY();
-
-			event.getMessageNode().setValue("");
-
-			petFollowing = true;
-
-			pet.spawn(getPathOutWorldPoint(client.getLocalPlayer().getWorldArea()),radToJau(Math.atan2(intx,inty)));
-			pet.setAnimation(pet.animationPoses[0]); //0 == walk
-			nextTravellingPoint = pet.getWorldLocation().toWorldArea();
-
-		}
-
-
-		if (event.getMessage().equals("!Set"))
-		{
-			//+64 + 30,+850 + 30,-30,-50,-30 .scale(65,65,65)
-			petModel = (Model) client.loadModelData(29631).light();
-		}
-		if (event.getMessage().equals("!Test"))
-		{
-			pet.init(client);
-			//actor.setModel((Model) client.loadModel(11056).scale(64,64,64));
-			WorldPoint wPoint = client.getLocalPlayer().getWorldLocation();
-			//light(+64,+850,-30,-50,-30) are defualt values for npcs
-			pet.setModel(petModel);
-
-			Player player = client.getLocalPlayer();
-
-
-			double intx = pet.getWorldLocation().toWorldArea().getX() - player.getWorldLocation().toWorldArea().getX();
-			double inty = pet.getWorldLocation().toWorldArea().getY() - player.getWorldLocation().toWorldArea().getY();
-
-
-
-			WorldPoint point = new WorldPoint(client.getLocalPlayer().getWorldLocation().getX() ,client.getLocalPlayer().getWorldLocation().getY(),client.getPlane());
-
-			pet.moveTo(point,radToJau(Math.atan2(intx,inty)));
-
-		}
-
-		if (event.getMessage().equals("!Go"))
-		{
-
-
-
-
-		}
-
-		if (event.getMessage().equals("!Anim"))
-		{
-			double intx = wizard.getWorldLocation().toWorldArea().getX() - pet.getWorldLocation().toWorldArea().getX();
-			double inty = wizard.getWorldLocation().toWorldArea().getY() - pet.getWorldLocation().toWorldArea().getY();
-
-			//343 graphic
-			wizard.getRlObject().setAnimation(client.loadAnimation(714));
-			wizard.spawn(getPathOutWorldPoint(pet.getWorldLocation().toWorldArea()),radToJau(Math.atan2(intx,inty)));
-
+			callPet(event);
 		}
 
 	}
-
-	private static ModelData createModel(Client client, ModelData... data)
-	{
-		return client.mergeModels(data);
-	}
-
-	private static ModelData createModel(Client client, int... data)
-	{
-		ModelData[] modelData = new ModelData[data.length];
-		for (int i = 0; i < data.length; i++)
-		{
-			modelData[i] = client.loadModelData(data[i]);
-		}
-		return client.mergeModels(modelData);
-	}
-
-
-
-	@Inject
-	private ChatboxPanelManager chatboxPanelManager;
-
-
-	private final List<WorldPoint> prevPlayerWPs = new ArrayList<>();
-
 
 
 	@Subscribe
@@ -289,26 +199,6 @@ public class ExamplePlugin extends Plugin
 		if (varbitChanged.getVarbitId() == 6719 && varbitChanged.getValue() == 0)
 		{
 			petEnterHouse = petFollowing;
-		}
-
-	}
-
-	WorldArea petWorldArea = null;
-
-	private void spawnPetInHouse()
-	{
-		if (petEnterHouse && petFollowing)
-		{
-			petEnterHouse = false;
-			WorldPoint wp = client.getLocalPlayer().getWorldLocation();
-			WorldPoint aWP = pet.getWorldLocation();
-
-			double intx = aWP.toWorldArea().getX() - wp.toWorldArea().getX();
-			double inty = aWP.toWorldArea().getY() - wp.toWorldArea().getY();
-
-			pet.spawn(client.getLocalPlayer().getWorldLocation(),radToJau(Math.atan2(intx,inty)));
-			pet.setAnimation(pet.animationPoses[0]);
-			nextTravellingPoint = pet.getWorldLocation().toWorldArea();
 		}
 
 	}
@@ -342,10 +232,10 @@ public class ExamplePlugin extends Plugin
 
 
 		WorldPoint worldPoint = getAndUpdatePlayersDelayedLoc();
-		WorldArea worldArea1 = new WorldArea(worldPoint,1,1);
+		WorldArea worldArea = new WorldArea(worldPoint,1,1);
 
 
-		nextTravellingPoint = petWorldArea.calculateNextTravellingPoint(client,worldArea1,true);
+		nextTravellingPoint = petWorldArea.calculateNextTravellingPoint(client,worldArea,true);
 
 
 		if (nextTravellingPoint == null && client.getLocalPlayer().getLocalLocation().distanceTo(pet.getLocalLocation()) < 100)
@@ -361,29 +251,50 @@ public class ExamplePlugin extends Plugin
 
 	}
 
-	private WorldPoint getAndUpdatePlayersDelayedLoc()
+
+	@Subscribe
+	public void onClientTick(ClientTick event)
 	{
 
-		WorldPoint worldPoint = null;
-
-		prevPlayerWPs.add(0,client.getLocalPlayer().getWorldLocation());
-
-		if (prevPlayerWPs.size() >= 2)
+		if (cutScene)
 		{
-			worldPoint = prevPlayerWPs.get(1);
+			double intx = wizard.getWorldLocation().toWorldArea().getX() - pet.getWorldLocation().toWorldArea().getX();
+			double inty = wizard.getWorldLocation().toWorldArea().getY() - pet.getWorldLocation().toWorldArea().getY();
+			wizard.rotateObject(intx,inty);
 		}
 
-		if (worldPoint == null)
+		if (pet.getRlObject() != null && pet.animationPoses != null)
 		{
-			worldPoint = client.getLocalPlayer().getWorldLocation();
+
+			List<LocalPoint> localPoints = new ArrayList<>();
+			List<Player> nonLocalPlayers = client.getPlayers().stream().filter(player -> !Objects.equals(player.getName(), client.getLocalPlayer().getName())).collect(Collectors.toList());
+			nonLocalPlayers.forEach(player -> localPoints.add(player.getLocalLocation()));
+			client.getNpcs().forEach(npc -> localPoints.add(npc.getLocalLocation()));
+
+			boolean overlappingModel = localPoints.stream().anyMatch(localPoint -> localPoint.equals(pet.getLocalLocation()));
+
+			if (pet.animationPoses[0].getId() == pet.getRlObject().getAnimation().getId() && overlappingModel)
+			{
+				pet.setModel(client.loadModel(0));
+			}
+			else if (!overlappingModel)
+			{
+				pet.setModel(petModel);
+			}
+
+			LocalPoint lp = pet.getLocalLocation();
+			int zOff = Perspective.getTileHeight(client,lp,client.getPlane());
+
+			poly = calculateAABB(client, pet.getRlObject().getModel(), pet.getOrientation(), pet.getLocalLocation().getX(), pet.getLocalLocation().getY(),client.getPlane(), zOff);
+
+			if (!cutScene)
+			{
+				pet.onClientTick(event);
+			}
+
 		}
 
-		if (prevPlayerWPs.size() > 10)
-		{
-			prevPlayerWPs.subList(10, prevPlayerWPs.size()).clear();
-		}
 
-		return worldPoint;
 	}
 
 	@Subscribe
@@ -436,16 +347,13 @@ public class ExamplePlugin extends Plugin
 	}
 
 
-	boolean dialogOpen;
 
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked event)
 	{
 
-		System.out.println(event.getMenuEntry());
 
-
-		if (event.getMenuTarget().contains("Abyssal orphan") && event.getMenuOption().equals("Pick-up"))
+		if (event.getMenuEntry().getType() == MenuAction.RUNELITE && event.getMenuTarget().contains("Abyssal orphan") && event.getMenuOption().equals("Pick-up"))
 		{
 			if (pet.isActive() && pet.getWorldLocation().toWorldArea().isInMeleeDistance(client.getLocalPlayer().getWorldArea()))
 			{
@@ -454,7 +362,7 @@ public class ExamplePlugin extends Plugin
 			}
 		}
 
-		if (event.getMenuTarget().contains("Abyssal orphan") && event.getMenuOption().equals("Talk-to"))
+		if (event.getMenuEntry().getType() == MenuAction.RUNELITE && event.getMenuTarget().contains("Abyssal orphan") && event.getMenuOption().equals("Talk-to"))
 		{
 			if (pet.isActive() && pet.getWorldLocation().toWorldArea().isInMeleeDistance(client.getLocalPlayer().getWorldArea()))
 			{
@@ -476,7 +384,104 @@ public class ExamplePlugin extends Plugin
 
 	}
 
-	SimplePolygon poly;
+
+
+
+
+	private void spawnPetInHouse()
+	{
+		if (petEnterHouse && petFollowing)
+		{
+			petEnterHouse = false;
+			WorldPoint wp = client.getLocalPlayer().getWorldLocation();
+			WorldPoint aWP = pet.getWorldLocation();
+
+			double intx = aWP.toWorldArea().getX() - wp.toWorldArea().getX();
+			double inty = aWP.toWorldArea().getY() - wp.toWorldArea().getY();
+
+			pet.spawn(client.getLocalPlayer().getWorldLocation(),radToJau(Math.atan2(intx,inty)));
+			pet.setAnimation(pet.animationPoses[0]);
+			nextTravellingPoint = pet.getWorldLocation().toWorldArea();
+		}
+
+	}
+
+
+	private void callPet(ChatMessage event)
+	{
+		if (pet.getRlObject() == null || !pet.isActive())
+		{
+
+			ModelData modelData = client.loadModelData(29631).cloneVertices();//29631 //39196
+			//modelData.scale(30,30,30);
+			petModel = modelData.light();
+
+			pet.init(client);
+			pet.setPoseAnimations(7125,7124,7124);
+			pet.setModel(petModel);
+
+//				actor.getRlObject().setDrawFrontTilesFirst(true);
+//				actor.getRlObject().setRadius(1);
+
+		}
+
+		WorldPoint wp = client.getLocalPlayer().getWorldLocation();
+		WorldPoint aWP = pet.getWorldLocation();
+
+		boolean petHasLOS = wp.toWorldArea().hasLineOfSightTo(client,aWP);
+
+		if (wp.toWorldArea().distanceTo(aWP.toWorldArea()) < 6 && petHasLOS && pet.isActive())
+		{
+			event.getMessageNode().setValue("Your follower is already close enough.");
+			//return;
+		}
+		else if (pet.isActive())
+		{
+			pet.despawn();
+		}
+
+
+		double intx = aWP.toWorldArea().getX() - wp.toWorldArea().getX();
+		double inty = aWP.toWorldArea().getY() - wp.toWorldArea().getY();
+
+		event.getMessageNode().setValue("");
+
+		petFollowing = true;
+
+		pet.spawn(getPathOutWorldPoint(client.getLocalPlayer().getWorldArea()),radToJau(Math.atan2(intx,inty)));
+		pet.setAnimation(pet.animationPoses[0]); //0 == walk
+		nextTravellingPoint = pet.getWorldLocation().toWorldArea();
+	}
+
+
+
+
+	private WorldPoint getAndUpdatePlayersDelayedLoc()
+	{
+
+		WorldPoint worldPoint = null;
+
+		prevPlayerWPs.add(0,client.getLocalPlayer().getWorldLocation());
+
+		if (prevPlayerWPs.size() >= 2)
+		{
+			worldPoint = prevPlayerWPs.get(1);
+		}
+
+		if (worldPoint == null)
+		{
+			worldPoint = client.getLocalPlayer().getWorldLocation();
+		}
+
+		if (prevPlayerWPs.size() > 10)
+		{
+			prevPlayerWPs.subList(10, prevPlayerWPs.size()).clear();
+		}
+
+		return worldPoint;
+	}
+
+
 
 	private int getRandomInt(int max, int min)
 	{
@@ -495,11 +500,20 @@ public class ExamplePlugin extends Plugin
 			{
 				if (worldArea.canTravelInDirection(client,i,0))
 				{
-					points.add(new WorldPoint(worldArea.getX() + i,worldArea.getY(),client.getPlane()));
+					WorldPoint worldPoint = new WorldPoint(worldArea.getX() + i,worldArea.getY(),client.getPlane());
+					if (!worldPoint.equals(client.getLocalPlayer().getWorldLocation()))
+					{
+						points.add(worldPoint);
+					}
+
 				}
 				if (worldArea.canTravelInDirection(client,0,i))
 				{
-					points.add(new WorldPoint(worldArea.getX(),worldArea.getY() + i,client.getPlane()));
+					WorldPoint worldPoint = new WorldPoint(worldArea.getX(),worldArea.getY() + 1,client.getPlane());
+					if (!worldPoint.equals(client.getLocalPlayer().getWorldLocation()))
+					{
+						points.add(worldPoint);
+					}
 				}
 			}
 		}
@@ -515,13 +529,6 @@ public class ExamplePlugin extends Plugin
 
 
 
-
-
-
-
-	boolean cutScene = false;
-	int gameTickCutSceneStart;
-	public String message;
 
 	public void runCutScene()
 	{
@@ -550,7 +557,7 @@ public class ExamplePlugin extends Plugin
 		ModelData partyhat = client.loadModelData(187).cloneColors().recolor((short)926, blue);
 
 		ModelData mdf = createModel(client,
-		  9103, // face
+				9103, // face
 				4925, // beard
 				176, // hands
 				181); // feet
@@ -579,19 +586,31 @@ public class ExamplePlugin extends Plugin
 				client.addChatMessage(ChatMessageType.GAMEMESSAGE,"", "MrNice98: <col=0000ff>"+message+"</col>","");
 				break;
 
+			case 7:
+				message = "";
+				break;
+
 			case 10:
-				message = "Dont you know your clippers pet";
+				message = "Don't you know your Clippers pet";
 				wizard.getRlObject().setAnimation(client.loadAnimation(813));
 				client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","MrNice98: <col=0000ff>"+message+"</col>","");
 				break;
 
+			case 16:
+				message = "";
+				break;
+
 			case 20:
-				message = "Sorry, i gotta bring him back to clipper";
+				message = "Sorry, I need bring him back to Clipper";
 				client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","MrNice98: <col=0000ff>"+message+"</col>","");//<col=ef1020>58:40</col>58:40</col>
 				break;
 
+			case 26:
+				message = "";
+				break;
+
 			case 30:
-				message = "Best i can do is a dupe Lil' Grumble";
+				message = "Best I can do is a dupe Lil' Grumble";
 				client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","MrNice98: <col=0000ff>"+message+"</col>","");
 				break;
 
@@ -602,57 +621,28 @@ public class ExamplePlugin extends Plugin
 				break;
 
 			case 37:
-				wizard.getRlObject().setActive(false);
-				pet.getRlObject().setActive(false);
+				wizard.despawn();
+				pet.despawn();
 				break;
 		}
 	}
 
 
-	@Subscribe
-	public void onClientTick(ClientTick event)
+	private static ModelData createModel(Client client, ModelData... data)
 	{
-
-		if (cutScene)
-		{
-			double intx = wizard.getWorldLocation().toWorldArea().getX() - pet.getWorldLocation().toWorldArea().getX();
-			double inty = wizard.getWorldLocation().toWorldArea().getY() - pet.getWorldLocation().toWorldArea().getY();
-			wizard.rotateObject(intx,inty);
-		}
-
-		if (pet.getRlObject() != null && pet.animationPoses != null)
-		{
-
-			List<LocalPoint> localPoints = new ArrayList<>();
-			List<Player> nonLocalPlayers = client.getPlayers().stream().filter(player -> !Objects.equals(player.getName(), client.getLocalPlayer().getName())).collect(Collectors.toList());
-			nonLocalPlayers.forEach(player -> localPoints.add(player.getLocalLocation()));
-			client.getNpcs().forEach(npc -> localPoints.add(npc.getLocalLocation()));
-
-			boolean overlappingModel = localPoints.stream().anyMatch(localPoint -> localPoint.equals(pet.getLocalLocation()));
-
-			if (pet.animationPoses[0].getId() == pet.getRlObject().getAnimation().getId() && overlappingModel)
-			{
-				pet.setModel(client.loadModel(0));
-			}
-			else if (!overlappingModel)
-			{
-				pet.setModel(petModel);
-			}
-
-			LocalPoint lp = pet.getLocalLocation();
-			int zOff = Perspective.getTileHeight(client,lp,client.getPlane());
-
-			poly = calculateAABB(client, pet.getRlObject().getModel(), pet.getOrientation(), pet.getLocalLocation().getX(), pet.getLocalLocation().getY(),client.getPlane(), zOff);
-
-			if (!cutScene)
-			{
-				pet.onClientTick(event);
-			}
-
-		}
-
-
+		return client.mergeModels(data);
 	}
+
+	private static ModelData createModel(Client client, int... data)
+	{
+		ModelData[] modelData = new ModelData[data.length];
+		for (int i = 0; i < data.length; i++)
+		{
+			modelData[i] = client.loadModelData(data[i]);
+		}
+		return client.mergeModels(modelData);
+	}
+
 
 	private static SimplePolygon calculateAABB(Client client, Model m, int jauOrient, int x, int y, int z, int zOff)
 	{
@@ -760,9 +750,6 @@ public class ExamplePlugin extends Plugin
 		}
 	}
 
-	@Provides
-	ExampleConfig provideConfig(ConfigManager configManager)
-	{
-		return configManager.getConfig(ExampleConfig.class);
-	}
+
+
 }

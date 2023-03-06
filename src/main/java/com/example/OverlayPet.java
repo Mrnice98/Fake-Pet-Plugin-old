@@ -32,7 +32,7 @@ public class OverlayPet extends Overlay
     public Dimension render(Graphics2D graphics)
     {
 
-        if (plugin.pet != null && plugin.pet.isActive() && plugin.nextTravellingPoint != null && plugin.poly != null)
+        if (plugin.pet.getRlObject() != null && plugin.pet.isActive() && plugin.nextTravellingPoint != null && plugin.poly != null)
         {
             if (plugin.poly.contains(client.getMouseCanvasPosition().getX(),client.getMouseCanvasPosition().getY()))
             {
@@ -50,11 +50,7 @@ public class OverlayPet extends Overlay
             graphics.draw(Perspective.getCanvasTilePoly(client,point));
 
 
-
-
-
             graphics.setFont(FontManager.getRunescapeBoldFont());
-
 
             if (plugin.wizard.getRlObject() != null && plugin.cutScene)
             {

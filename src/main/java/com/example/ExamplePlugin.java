@@ -16,6 +16,7 @@ import net.runelite.api.model.Jarvis;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.game.chatbox.ChatboxPanelManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -86,7 +87,12 @@ public class ExamplePlugin extends Plugin
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged gameStateChanged)
 	{
-		System.out.println(gameStateChanged.getGameState());
+
+		if (pet.getRlObject() == null)
+		{
+			return;
+		}
+
 		if (gameStateChanged.getGameState() == GameState.LOADING && pet.isActive())
 		{
 			lastPlayerWP = client.getLocalPlayer().getWorldLocation();
@@ -146,7 +152,7 @@ public class ExamplePlugin extends Plugin
 	@Inject
 	ChatboxThing chatboxThing;
 
-	ObjectModel wizard = new ObjectModel();
+	public ObjectModel wizard = new ObjectModel();
 
 	//add thing to handle hopping, when you hop your pet teles too you
 
@@ -159,19 +165,14 @@ public class ExamplePlugin extends Plugin
 		{
 			if (pet.getRlObject() == null || !pet.isActive())
 			{
-				petModel = (Model) client.loadModelData(29631).light();
-
 
 				ModelData modelData = client.loadModelData(29631).cloneVertices();//29631 //39196
 				//modelData.scale(30,30,30);
 				petModel = modelData.light();
 
-
-				//Perspective.getCanvasTextLocation()
 				pet.init(client);
 				pet.setPoseAnimations(7125,7124,7124);
 				pet.setModel(petModel);
-
 
 //				actor.getRlObject().setDrawFrontTilesFirst(true);
 //				actor.getRlObject().setRadius(1);
@@ -273,6 +274,8 @@ public class ExamplePlugin extends Plugin
 
 
 
+	@Inject
+	private ChatboxPanelManager chatboxPanelManager;
 
 
 	private final List<WorldPoint> prevPlayerWPs = new ArrayList<>();
@@ -321,7 +324,7 @@ public class ExamplePlugin extends Plugin
 
 		spawnPetInHouse();
 
-		if (pet == null || !pet.isActive())
+		if (pet.getRlObject() == null || !pet.isActive())
 		{
 			return;
 		}
@@ -386,6 +389,10 @@ public class ExamplePlugin extends Plugin
 	@Subscribe
 	public void onMenuOpened(MenuOpened event)
 	{
+		if (pet.getRlObject() == null || !pet.isActive())
+		{
+			return;
+		}
 
 		int firstMenuIndex = 0;
 
@@ -428,9 +435,16 @@ public class ExamplePlugin extends Plugin
 
 	}
 
+
+	boolean dialogOpen;
+
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked event)
 	{
+
+		System.out.println(event.getMenuEntry());
+
+
 		if (event.getMenuTarget().contains("Abyssal orphan") && event.getMenuOption().equals("Pick-up"))
 		{
 			if (pet.isActive() && pet.getWorldLocation().toWorldArea().isInMeleeDistance(client.getLocalPlayer().getWorldArea()))
@@ -438,16 +452,21 @@ public class ExamplePlugin extends Plugin
 				petFollowing = false;
 				pet.despawn();
 			}
-
 		}
 
 		if (event.getMenuTarget().contains("Abyssal orphan") && event.getMenuOption().equals("Talk-to"))
 		{
 			if (pet.isActive() && pet.getWorldLocation().toWorldArea().isInMeleeDistance(client.getLocalPlayer().getWorldArea()))
 			{
-				fakeDialogManager.open(dialogProvider.ABYSSAL_ORPHAN);
+				dialogOpen = true;
+				fakeDialogManager.open(dialogProvider.CALL_THE_WIZARD);
 			}
+		}
 
+		if (!event.getMenuTarget().contains("Abyssal orphan") && !event.getMenuOption().equals("Continue") && dialogOpen)
+		{
+			dialogOpen = false;
+			chatboxPanelManager.close();
 		}
 
 
@@ -601,11 +620,11 @@ public class ExamplePlugin extends Plugin
 			wizard.rotateObject(intx,inty);
 		}
 
-		if (pet != null)
+		if (pet.getRlObject() != null && pet.animationPoses != null)
 		{
 
 			List<LocalPoint> localPoints = new ArrayList<>();
-			List<Player> nonLocalPlayers = client.getPlayers().stream().filter(player -> !player.getName().equals(client.getLocalPlayer().getName())).collect(Collectors.toList());
+			List<Player> nonLocalPlayers = client.getPlayers().stream().filter(player -> !Objects.equals(player.getName(), client.getLocalPlayer().getName())).collect(Collectors.toList());
 			nonLocalPlayers.forEach(player -> localPoints.add(player.getLocalLocation()));
 			client.getNpcs().forEach(npc -> localPoints.add(npc.getLocalLocation()));
 

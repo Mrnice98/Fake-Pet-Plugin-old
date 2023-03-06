@@ -119,14 +119,9 @@ public class ObjectModel
 
 	
 	// moveTo() adds target movement states to the queue for later per-frame updating for rendering in onClientTick()
-	// Set this every game tick for each new position (usually only up to 2 tiles out)
-	// This is not set up for pathfinding to the final destination of distant targets (you will just move there directly)
-	// It will, however, handle nearby collision detection (1-2 tiles away from you) under certain scenarios
-	// jauOrientation is not used if isInteracting is false; it will instead default to the angle being moved towards
 	public void moveTo(WorldPoint worldPosition, int jauOrientation)
 	{
 
-		// respawn this actor if it was previously despawned
 		if (!rlObject.isActive())
 		{
 			spawn(worldPosition, jauOrientation);
@@ -148,7 +143,6 @@ public class ObjectModel
 			return;
 		}
 
-		// use current position if nothing is in queue
 		WorldPoint prevWorldPosition;
 		if (targetQueueSize++ > 0)
 		{
@@ -303,7 +297,7 @@ public class ObjectModel
 
 	static int radToJau(double a)
 	{
-		int j = (int) Math.round(a / Perspective.UNIT); // [0, 2048) for a in [0, 2pi)
+		int j = (int) Math.round(a / Perspective.UNIT);
 		return j & 2047;
 	}
 

@@ -52,7 +52,7 @@ public class OverlayPet extends Overlay
 
             graphics.setFont(FontManager.getRunescapeBoldFont());
 
-            if (plugin.wizard.getRlObject() != null && plugin.cutScene)
+            if (plugin.wizard.getRlObject() != null && plugin.cutScene && plugin.wizard.isActive())
             {
                 Point canvasPoint2 = Perspective.getCanvasTextLocation(client,graphics,plugin.wizard.getLocalLocation(),plugin.message,plugin.wizard.getRlObject().getModelHeight() + 45);
                 OverlayUtil.renderTextLocation(graphics,canvasPoint2,plugin.message,Color.YELLOW);

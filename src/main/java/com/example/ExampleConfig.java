@@ -8,12 +8,12 @@ import net.runelite.client.config.ConfigItem;
 public interface ExampleConfig extends Config
 {
 	@ConfigItem(
-		keyName = "greeting",
-		name = "Welcome Greeting",
-		description = "The message to show to the user when they login"
+		keyName = "pet",
+		name = "Pick Pet",
+		description = "Pick pet"
 	)
-	default String greeting()
+	default PetData pet()
 	{
-		return "Hello";
+		return PetData.ABYSSAL_ORPHAN;
 	}
 }

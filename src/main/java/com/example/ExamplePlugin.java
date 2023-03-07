@@ -13,9 +13,11 @@ import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.*;
 import net.runelite.api.geometry.SimplePolygon;
 import net.runelite.api.model.Jarvis;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.chatbox.ChatboxPanelManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -59,6 +61,9 @@ public class ExamplePlugin extends Plugin
 
 	@Inject
 	private ChatboxPanelManager chatboxPanelManager;
+
+	@Inject
+	private ClientThread clientThread;
 
 	@Override
 	protected void startUp() throws Exception
@@ -107,6 +112,46 @@ public class ExamplePlugin extends Plugin
 
 	public SimplePolygon poly;
 
+
+
+
+
+	//fix this
+	@Subscribe
+	public void onConfigChanged(ConfigChanged event)
+	{
+		if (event.getKey().equals("pet"))
+		{
+			clientThread.invokeLater(this::updatePet);
+		}
+
+
+
+	}
+
+	public void updatePet()
+	{
+		petData = PetData.pets.get(config.pet().getName());
+		ModelData modelData = client.loadModelData(petData.getModelIDs().get(0)).cloneVertices();//29631 //39196 //29631
+		//modelData.scale(30,30,30);
+		petModel = modelData.light();
+
+		pet.setPoseAnimations(petData.getIdleAnim(),petData.getWalkAnim(),petData.getRunAnim());
+
+		if (pet.getLocalLocation().distanceTo(LocalPoint.fromWorld(client,nextTravellingPoint.toWorldPoint())) > 0)
+		{
+			pet.setAnimation(pet.animationPoses[1]);
+		}
+		else
+		{
+			pet.setAnimation(pet.animationPoses[0]);
+		}
+
+		pet.setModel(petModel);
+
+
+
+	}
 
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged gameStateChanged)
@@ -173,6 +218,8 @@ public class ExamplePlugin extends Plugin
 
 	//add thing to handle hopping, when you hop your pet teles too you
 
+	private PetData petData;
+
 	@Subscribe
 	public void onChatMessage(ChatMessage event)
 	{
@@ -218,6 +265,7 @@ public class ExamplePlugin extends Plugin
 		{
 			return;
 		}
+
 
 		Player player = client.getLocalPlayer();
 		double intx = pet.getLocalLocation().getX() - player.getLocalLocation().getX();
@@ -275,11 +323,11 @@ public class ExamplePlugin extends Plugin
 
 			if (pet.animationPoses[0].getId() == pet.getRlObject().getAnimation().getId() && overlappingModel)
 			{
-				pet.setModel(client.loadModel(0));
+				//pet.setModel(client.loadModel(0));
 			}
 			else if (!overlappingModel)
 			{
-				pet.setModel(petModel);
+				//pet.setModel(petModel);
 			}
 
 			LocalPoint lp = pet.getLocalLocation();
@@ -317,8 +365,12 @@ public class ExamplePlugin extends Plugin
 		}
 
 
-
 		List<String> options = Arrays.asList("Talk-to","Pick-up","Examine");
+
+		if (petData.isMetamorph() )
+		{
+			options = Arrays.asList("Talk-to","Pick-up","Metamorphosis","Examine");
+		}
 
 
 		for (String string : options)
@@ -327,7 +379,7 @@ public class ExamplePlugin extends Plugin
 			{
 				client.createMenuEntry(firstMenuIndex)
 						.setOption(string)
-						.setTarget("<col=ffff00>" + "Abyssal orphan" + "</col>")
+						.setTarget("<col=ffff00>" + petData.getName() + "</col>")
 						.setType(MenuAction.RUNELITE)
 						.setParam0(0)
 						.setParam1(0)
@@ -352,8 +404,13 @@ public class ExamplePlugin extends Plugin
 	public void onMenuOptionClicked(MenuOptionClicked event)
 	{
 
+		if (petData == null)
+		{
+			return;
+		}
 
-		if (event.getMenuEntry().getType() == MenuAction.RUNELITE && event.getMenuTarget().contains("Abyssal orphan") && event.getMenuOption().equals("Pick-up"))
+
+		if (event.getMenuEntry().getType() == MenuAction.RUNELITE && event.getMenuTarget().contains(petData.getName()) && event.getMenuOption().equals("Pick-up"))
 		{
 			if (pet.isActive() && pet.getWorldLocation().toWorldArea().isInMeleeDistance(client.getLocalPlayer().getWorldArea()))
 			{
@@ -362,7 +419,7 @@ public class ExamplePlugin extends Plugin
 			}
 		}
 
-		if (event.getMenuEntry().getType() == MenuAction.RUNELITE && event.getMenuTarget().contains("Abyssal orphan") && event.getMenuOption().equals("Talk-to"))
+		if (event.getMenuEntry().getType() == MenuAction.RUNELITE && event.getMenuTarget().contains(petData.getName()) && event.getMenuOption().equals("Talk-to"))
 		{
 			if (pet.isActive() && pet.getWorldLocation().toWorldArea().isInMeleeDistance(client.getLocalPlayer().getWorldArea()))
 			{
@@ -371,7 +428,7 @@ public class ExamplePlugin extends Plugin
 			}
 		}
 
-		if (!event.getMenuTarget().contains("Abyssal orphan") && !event.getMenuOption().equals("Continue") && dialogOpen)
+		if (!event.getMenuTarget().contains(petData.getName()) && !event.getMenuOption().equals("Continue") && dialogOpen)
 		{
 			dialogOpen = false;
 			chatboxPanelManager.close();
@@ -390,7 +447,7 @@ public class ExamplePlugin extends Plugin
 
 	private void spawnPetInHouse()
 	{
-		if (petEnterHouse && petFollowing)
+		if (petEnterHouse && petFollowing && !cutScene)
 		{
 			petEnterHouse = false;
 			WorldPoint wp = client.getLocalPlayer().getWorldLocation();
@@ -409,15 +466,19 @@ public class ExamplePlugin extends Plugin
 
 	private void callPet(ChatMessage event)
 	{
+
 		if (pet.getRlObject() == null || !pet.isActive())
 		{
 
-			ModelData modelData = client.loadModelData(29631).cloneVertices();//29631 //39196
+			petData = PetData.pets.get(config.pet().getName());
+
+
+			ModelData modelData = client.loadModelData(petData.getModelIDs().get(0)).cloneVertices();//29631 //39196 //29631
 			//modelData.scale(30,30,30);
 			petModel = modelData.light();
 
 			pet.init(client);
-			pet.setPoseAnimations(7125,7124,7124);
+			pet.setPoseAnimations(petData.getIdleAnim(),petData.getWalkAnim(),petData.getRunAnim());
 			pet.setModel(petModel);
 
 //				actor.getRlObject().setDrawFrontTilesFirst(true);
@@ -623,6 +684,7 @@ public class ExamplePlugin extends Plugin
 			case 37:
 				wizard.despawn();
 				pet.despawn();
+				petFollowing = false;
 				break;
 		}
 	}

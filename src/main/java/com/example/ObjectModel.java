@@ -84,7 +84,8 @@ public class ObjectModel
 		this.cTargetIndex = 0;
 		this.targetQueueSize = 0;
 	}
-	
+
+	//add 180, 90R and 90L animation support look at snakling data
 	public void setPoseAnimations(int idle, int walk, int run)
 	{
 		this.animationPoses[POSE_ANIM.IDLE.ordinal()] = client.loadAnimation(idle);//7125
@@ -167,6 +168,10 @@ public class ObjectModel
 	{
 		if (rlObject.isActive())
 		{
+			double intx = rlObject.getLocation().getX() - client.getLocalPlayer().getLocalLocation().getX();
+			double inty = rlObject.getLocation().getY() - client.getLocalPlayer().getLocalLocation().getY();
+
+			boolean rotationDone = rotateObject(intx,inty);
 
 			if (targetQueueSize > 0)
 			{
@@ -231,10 +236,6 @@ public class ObjectModel
 				}
 
 
-				double intx = rlObject.getLocation().getX() - client.getLocalPlayer().getLocalLocation().getX();
-				double inty = rlObject.getLocation().getY() - client.getLocalPlayer().getLocalLocation().getY();
-
-				boolean rotationDone = rotateObject(intx,inty);
 
 				// have we arrived at our target?
 				if (dx == 0 && dy == 0 && rotationDone)

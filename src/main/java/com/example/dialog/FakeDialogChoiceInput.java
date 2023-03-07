@@ -57,6 +57,7 @@ public class FakeDialogChoiceInput extends ChatboxInput implements KeyListener
 		prompt.setWidthMode(WidgetSizeMode.MINUS);
 		prompt.revalidate();
 
+
 		int y = prompt.getRelativeX() + prompt.getHeight() + 6;
 		int height = container.getHeight() - y - 8;
 		int step = height / dialogNode.getChoices().size();
@@ -97,6 +98,7 @@ public class FakeDialogChoiceInput extends ChatboxInput implements KeyListener
 			y += step;
 		}
 
+
 		// left sword
 		container.createChild(-1, WidgetType.GRAPHIC)
 			.setSpriteId(SpriteID.RS2_SWORD_POINTED_RIGHT)
@@ -105,6 +107,7 @@ public class FakeDialogChoiceInput extends ChatboxInput implements KeyListener
 			.setOriginalWidth(57)
 			.setOriginalHeight(13)
 			.revalidate();
+
 
 		// right sword
 		container.createChild(-1, WidgetType.GRAPHIC)

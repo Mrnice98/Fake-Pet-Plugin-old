@@ -54,7 +54,7 @@ public class OverlayPet extends Overlay
 
             if (plugin.wizard.getRlObject() != null && plugin.cutScene && plugin.wizard.isActive())
             {
-                Point canvasPoint2 = Perspective.getCanvasTextLocation(client,graphics,plugin.wizard.getLocalLocation(),plugin.message,plugin.wizard.getRlObject().getModelHeight() + 45);
+                Point canvasPoint2 = Perspective.getCanvasTextLocation(client,graphics,plugin.wizard.getLocalLocation(),plugin.message,plugin.wizard.getHeight() + 45);
                 OverlayUtil.renderTextLocation(graphics,canvasPoint2,plugin.message,Color.YELLOW);
             }
 

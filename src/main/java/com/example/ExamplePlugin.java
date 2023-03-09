@@ -122,6 +122,7 @@ public class ExamplePlugin extends Plugin
 	{
 		if (event.getKey().equals("pet"))
 		{
+			petData = PetData.pets.get(config.pet().getIdentifier());
 			clientThread.invokeLater(this::updatePet);
 		}
 
@@ -129,12 +130,33 @@ public class ExamplePlugin extends Plugin
 
 	}
 
+	//contrast * 5 + 850
+	public Model provideModel()
+	{
+		ModelData[] modelDataArray = new ModelData[petData.getModelIDs().size()];
+		for (int i = 0; i < petData.getModelIDs().size(); i++)
+		{
+			 modelDataArray[i] = client.loadModelData(petData.getModelIDs().get(i));
+		}
+
+		ModelData modelData = createModel(client,modelDataArray);
+		modelData.cloneVertices();
+		if (petData.getScale() != -1)
+		{
+			modelData.scale(petData.getScale(),petData.getScale(),petData.getScale());
+		}
+
+		int ambient = (petData.getAmbient() != -1 ? petData.getAmbient() : 0);
+		int contrast = (petData.getContrast() != -1 ? petData.getContrast() : 0);
+
+		return modelData.light(ambient + 64, contrast + 850,-30,-50,-30);
+	}
+
 	public void updatePet()
 	{
-		petData = PetData.pets.get(config.pet().getName());
-		ModelData modelData = client.loadModelData(petData.getModelIDs().get(0)).cloneVertices();//29631 //39196 //29631
+		//29631 //39196 //29631
 		//modelData.scale(30,30,30);
-		petModel = modelData.light();
+		petModel = provideModel();
 
 		pet.setPoseAnimations(petData.getIdleAnim(),petData.getWalkAnim(),petData.getRunAnim());
 
@@ -259,7 +281,11 @@ public class ExamplePlugin extends Plugin
 			updateWizardActions();
 		}
 
+		WorldPoint playerDelayedLoc;
+		playerDelayedLoc = getAndUpdatePlayersDelayedLoc();
+
 		spawnPetInHouse();
+
 
 		if (pet.getRlObject() == null || !pet.isActive())
 		{
@@ -279,8 +305,7 @@ public class ExamplePlugin extends Plugin
 		}
 
 
-		WorldPoint worldPoint = getAndUpdatePlayersDelayedLoc();
-		WorldArea worldArea = new WorldArea(worldPoint,1,1);
+		WorldArea worldArea = new WorldArea(playerDelayedLoc,1,1);
 
 
 		nextTravellingPoint = petWorldArea.calculateNextTravellingPoint(client,worldArea,true);
@@ -367,7 +392,7 @@ public class ExamplePlugin extends Plugin
 
 		List<String> options = Arrays.asList("Talk-to","Pick-up","Examine");
 
-		if (petData.isMetamorph() )
+		if (petData.isMetamorph())
 		{
 			options = Arrays.asList("Talk-to","Pick-up","Metamorphosis","Examine");
 		}
@@ -416,6 +441,17 @@ public class ExamplePlugin extends Plugin
 			{
 				petFollowing = false;
 				pet.despawn();
+			}
+		}
+
+
+
+		if (event.getMenuEntry().getType() == MenuAction.RUNELITE && event.getMenuTarget().contains(petData.getName()) && event.getMenuOption().equals("Metamorphosis"))
+		{
+			if (pet.isActive())
+			{
+				petData = PetData.morphModel.get(petData.getIdentifier());
+				updatePet();
 			}
 		}
 
@@ -470,12 +506,12 @@ public class ExamplePlugin extends Plugin
 		if (pet.getRlObject() == null || !pet.isActive())
 		{
 
-			petData = PetData.pets.get(config.pet().getName());
+			petData = PetData.pets.get(config.pet().getIdentifier());
 
 
-			ModelData modelData = client.loadModelData(petData.getModelIDs().get(0)).cloneVertices();//29631 //39196 //29631
+			//29631 //39196 //29631
 			//modelData.scale(30,30,30);
-			petModel = modelData.light();
+			petModel = provideModel();
 
 			pet.init(client);
 			pet.setPoseAnimations(petData.getIdleAnim(),petData.getWalkAnim(),petData.getRunAnim());
@@ -509,7 +545,7 @@ public class ExamplePlugin extends Plugin
 
 		petFollowing = true;
 
-		pet.spawn(getPathOutWorldPoint(client.getLocalPlayer().getWorldArea()),radToJau(Math.atan2(intx,inty)));
+		pet.spawn(getPathOutWorldPoint(getAndUpdatePlayersDelayedLoc().toWorldArea()),radToJau(Math.atan2(intx,inty)));
 		pet.setAnimation(pet.animationPoses[0]); //0 == walk
 		nextTravellingPoint = pet.getWorldLocation().toWorldArea();
 	}
@@ -519,6 +555,11 @@ public class ExamplePlugin extends Plugin
 
 	private WorldPoint getAndUpdatePlayersDelayedLoc()
 	{
+		if (client.getLocalPlayer().getWorldLocation() == null)
+		{
+			return null;
+		}
+
 
 		WorldPoint worldPoint = null;
 

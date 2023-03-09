@@ -52,6 +52,11 @@ public class ObjectModel
 		rlObject.setModel(model);
 	}
 
+	public int getHeight()
+	{
+		return rlObject.getModelHeight();
+	}
+
 	public RuneLiteObject getRlObject()
 	{
 		return rlObject;

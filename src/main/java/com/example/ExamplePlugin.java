@@ -154,10 +154,7 @@ public class ExamplePlugin extends Plugin
 
 	public void updatePet()
 	{
-		//29631 //39196 //29631
-		//modelData.scale(30,30,30);
 		petModel = provideModel();
-
 		pet.setPoseAnimations(petData.getIdleAnim(),petData.getWalkAnim(),petData.getRunAnim());
 
 		if (pet.getLocalLocation().distanceTo(LocalPoint.fromWorld(client,nextTravellingPoint.toWorldPoint())) > 0)
@@ -170,8 +167,6 @@ public class ExamplePlugin extends Plugin
 		}
 
 		pet.setModel(petModel);
-
-
 
 	}
 

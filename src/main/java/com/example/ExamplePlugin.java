@@ -21,9 +21,13 @@ import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.chatbox.ChatboxPanelManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.ui.ClientToolbar;
+import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.client.util.ImageUtil;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -68,6 +72,7 @@ public class ExamplePlugin extends Plugin
 	@Override
 	protected void startUp() throws Exception
 	{
+		buildSidePanel();
 		overlayManager.add(overlayPet);
 		eventBus.register(fakeDialogManager);
 
@@ -78,6 +83,7 @@ public class ExamplePlugin extends Plugin
 	{
 		overlayManager.remove(overlayPet);
 		eventBus.register(fakeDialogManager);
+		clientToolbar.removeNavigation(navButton);
 
 	}
 
@@ -123,7 +129,7 @@ public class ExamplePlugin extends Plugin
 		if (event.getKey().equals("pet"))
 		{
 			petData = PetData.pets.get(config.pet().getIdentifier());
-			clientThread.invokeLater(this::updatePet);
+			clientThread.invokeLater(()-> updatePet());
 		}
 
 
@@ -152,6 +158,27 @@ public class ExamplePlugin extends Plugin
 		return modelData.light(ambient + 64, contrast + 850,-30,-50,-30);
 	}
 
+
+
+	@Inject
+	private ClientToolbar clientToolbar;
+
+	private FakePetPanel panel;
+
+	private NavigationButton navButton;
+
+
+
+	private void buildSidePanel()
+	{
+		panel = injector.getInstance(FakePetPanel.class);
+		panel.sidePanelInitializer();
+		BufferedImage icon = ImageUtil.loadImageResource(getClass(), "/icon.png");
+		navButton = NavigationButton.builder().tooltip("Fake Pet").icon(icon).priority(5).panel(panel).build();
+		clientToolbar.addNavigation(navButton);
+	}
+
+
 	public void updatePet()
 	{
 		petModel = provideModel();
@@ -168,6 +195,12 @@ public class ExamplePlugin extends Plugin
 
 		pet.setModel(petModel);
 
+	}
+
+	public void updatePet(PetData buttonPetData)
+	{
+		petData = buttonPetData;
+		updatePet();
 	}
 
 	@Subscribe
@@ -235,7 +268,7 @@ public class ExamplePlugin extends Plugin
 
 	//add thing to handle hopping, when you hop your pet teles too you
 
-	private PetData petData;
+	public PetData petData;
 
 	@Subscribe
 	public void onChatMessage(ChatMessage event)

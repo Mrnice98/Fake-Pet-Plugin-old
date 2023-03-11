@@ -4,6 +4,7 @@ import com.example.dialog.DialogProvider;
 import com.example.dialog.FakeDialogManager;
 import com.google.inject.Provides;
 import javax.inject.Inject;
+import javax.swing.*;
 
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
@@ -18,6 +19,7 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
+import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.chatbox.ChatboxPanelManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -167,20 +169,32 @@ public class ExamplePlugin extends Plugin
 
 	private NavigationButton navButton;
 
+	@Inject
+	private ItemManager itemManager;
 
 
 	private void buildSidePanel()
 	{
 		panel = injector.getInstance(FakePetPanel.class);
 		panel.sidePanelInitializer();
-		BufferedImage icon = ImageUtil.loadImageResource(getClass(), "/icon.png");
+
+		if (petData == null)
+		{
+			petData = PetData.pets.get(config.pet().getIdentifier());
+		}
+
+		BufferedImage icon = ImageUtil.loadImageResource(getClass(), "/nav_icon.png");
 		navButton = NavigationButton.builder().tooltip("Fake Pet").icon(icon).priority(5).panel(panel).build();
 		clientToolbar.addNavigation(navButton);
 	}
 
 
+
+
 	public void updatePet()
 	{
+		configManager.setConfiguration("example","pet",petData);
+
 		petModel = provideModel();
 		pet.setPoseAnimations(petData.getIdleAnim(),petData.getWalkAnim(),petData.getRunAnim());
 
@@ -195,6 +209,7 @@ public class ExamplePlugin extends Plugin
 
 		pet.setModel(petModel);
 
+		panel.updateCurrentPetIcon();
 	}
 
 	public void updatePet(PetData buttonPetData)
@@ -527,16 +542,15 @@ public class ExamplePlugin extends Plugin
 
 	}
 
+	@Inject
+	ConfigManager configManager;
 
 	private void callPet(ChatMessage event)
 	{
 
-		if (pet.getRlObject() == null || !pet.isActive())
+		if ((pet.getRlObject() == null || !pet.isActive()))
 		{
-
 			petData = PetData.pets.get(config.pet().getIdentifier());
-
-
 			//29631 //39196 //29631
 			//modelData.scale(30,30,30);
 			petModel = provideModel();

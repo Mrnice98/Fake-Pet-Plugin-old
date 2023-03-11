@@ -21,6 +21,8 @@ public enum PetData {
     KREEARRA_JR("Kree'arra Jr.","Kree'arra Jr.",ItemID.PET_KREEARRA,Lists.newArrayList(28019,28021,28020),7166,7167,7167,30,30,30,false,null),
     LITTLE_NIGHTMARE("Little Nightmare","Little Nightmare",ItemID.LITTLE_NIGHTMARE,Lists.newArrayList(39196),8593,8634,8634,30,-1,-1,true,null),
     GENERAL_GRAARDOR_JR("General Graardor Jr.","General Graardor Jr.",ItemID.PET_GENERAL_GRAARDOR,Lists.newArrayList(27660,27665),7017,7016,7016,30,30,30,false,"GRRRRRRRR"),
+    JAL_NIB_REK("Jal-Nib-Rek","Jal-Nib-Rek",ItemID.JALNIBREK,Lists.newArrayList(33005),7573,7572,7572,-1,30,30,true,"GRRRRRRRR"),
+    TZREK_ZUK("TzRek-Zuk","TzRek-Zuk",ItemID.TZREKZUK,Lists.newArrayList(34586),7975,7977,7977,18,30,30,true,"GRRRRRRRR"),
 
 
     ;
@@ -58,6 +60,9 @@ public enum PetData {
         morphModel.put("Snakeling Red",SNAKELING_GREEN);
         morphModel.put("Snakeling Blue",SNAKELING_RED);
         morphModel.put("Snakeling Green",SNAKELING_BLUE);
+
+        morphModel.put("TzRek-Zuk",JAL_NIB_REK);
+        morphModel.put("Jal-Nib-Rek",TZREK_ZUK);
 
     }
 

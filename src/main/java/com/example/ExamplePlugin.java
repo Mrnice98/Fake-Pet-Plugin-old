@@ -148,11 +148,27 @@ public class ExamplePlugin extends Plugin
 		}
 
 		ModelData modelData = createModel(client,modelDataArray);
-		modelData.cloneVertices();
+
 		if (petData.getScale() != -1)
 		{
+			modelData.cloneVertices();
 			modelData.scale(petData.getScale(),petData.getScale(),petData.getScale());
 		}
+
+
+		//cut list in half fist half color to find, second half color to replace
+		if (petData.getRecolorIDs() !=  null)
+		{
+			modelData.cloneColors();
+			int mid = (petData.getRecolorIDs().size() / 2);
+
+			for (int i = 0; i < mid; i++)
+			{
+				modelData.recolor(petData.getRecolorIDs().get(i),petData.getRecolorIDs().get(mid + i));
+			}
+
+		}
+
 
 		int ambient = (petData.getAmbient() != -1 ? petData.getAmbient() : 0);
 		int contrast = (petData.getContrast() != -1 ? petData.getContrast() : 0);
@@ -193,7 +209,11 @@ public class ExamplePlugin extends Plugin
 
 	public void updatePet()
 	{
-		configManager.setConfiguration("example","pet",petData);
+		if (petData != null)
+		{
+			configManager.setConfiguration("example","pet",petData);
+
+		}
 
 		petModel = provideModel();
 		pet.setPoseAnimations(petData.getIdleAnim(),petData.getWalkAnim(),petData.getRunAnim());
@@ -551,8 +571,6 @@ public class ExamplePlugin extends Plugin
 		if ((pet.getRlObject() == null || !pet.isActive()))
 		{
 			petData = PetData.pets.get(config.pet().getIdentifier());
-			//29631 //39196 //29631
-			//modelData.scale(30,30,30);
 			petModel = provideModel();
 
 			pet.init(client);

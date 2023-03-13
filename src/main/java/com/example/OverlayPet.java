@@ -43,14 +43,14 @@ public class OverlayPet extends Overlay
                 graphics.setColor(Color.WHITE);
             }
 
-            graphics.draw(plugin.poly);
+          //  graphics.draw(plugin.poly);
 
             WorldPoint wp = new WorldPoint(plugin.nextTravellingPoint.getX(),plugin.nextTravellingPoint.getY(),client.getPlane());
             LocalPoint point = LocalPoint.fromWorld(client,wp);
             graphics.draw(Perspective.getCanvasTilePoly(client,point));
 
 
-            graphics.setFont(FontManager.getRunescapeBoldFont());
+           // graphics.setFont(FontManager.getRunescapeBoldFont());
 
             if (plugin.wizard.getRlObject() != null && plugin.cutScene && plugin.wizard.isActive())
             {

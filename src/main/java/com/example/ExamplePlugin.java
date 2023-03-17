@@ -366,14 +366,19 @@ public class ExamplePlugin extends Plugin
 		if (nextTravellingPoint != null)
 		{
 			petWorldArea = nextTravellingPoint;
+			petWorldArea = new WorldArea(nextTravellingPoint.toWorldPoint(),2,2);
 		}
+
 
 
 		WorldArea worldArea = new WorldArea(playerDelayedLoc,1,1);
 
 
-		nextTravellingPoint = petWorldArea.calculateNextTravellingPoint(client,worldArea,true);
+		pet.getRlObject().setRadius(70);
+		pet.getRlObject().setDrawFrontTilesFirst(true);
 
+
+		nextTravellingPoint = petWorldArea.calculateNextTravellingPoint(client,worldArea,true);
 
 		if (nextTravellingPoint == null && client.getLocalPlayer().getLocalLocation().distanceTo(pet.getLocalLocation()) < 100)
 		{
@@ -427,6 +432,7 @@ public class ExamplePlugin extends Plugin
 			if (!cutScene)
 			{
 				pet.onClientTick(event);
+
 			}
 
 		}

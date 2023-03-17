@@ -114,19 +114,107 @@ public enum PetData {
     VENENATIS_SPIDERLING_27648("Venenatis spiderling 27648","Venenatis spiderling",ItemID.VENENATIS_SPIDERLING_27648,Lists.newArrayList(28294,28295),5326,5325,5325,60,30,30,null,true,"GRRRRRRRR"),
 
     CALLISTO_CUB("Callisto cub","Callisto cub",ItemID.CALLISTO_CUB,Lists.newArrayList(47396),10011,10010,10010,16,30,30,null,true,"GRRRRRRRR"),
-    CALLISTO_CUB_27649("Callisto cub 27649","Callisto cub",ItemID.CALLISTO_CUB_27649,Lists.newArrayList(27649),4919,4923,4923,35,30,30,null,true,"GRRRRRRRR"),
+    CALLISTO_CUB_27649("Callisto cub 27649","Callisto cub",ItemID.CALLISTO_CUB_27649,Lists.newArrayList(28298),4919,4923,4923,35,30,30,null,true,"GRRRRRRRR"),
 
     VETION_JR("Vet'ion Jr.","Vet'ion Jr.",ItemID.VETION_JR,Lists.newArrayList(47387,47384),9965,9967,9967,54,30,30,null,true,"GRRRRRRRR"),
     VETION_JR_13180("Vet'ion Jr. 13180","Vet'ion Jr.",ItemID.VETION_JR_13180,Lists.newArrayList(47383,47385,47388,47389),9965,9967,9967,54,30,30,Lists.newArrayList((short)55184,(short)54926,(short)54693,(short)55190,(short)54571,(short)54804  ,(short)4019,(short)4007,(short)4007,(short)3879,(short)4023,(short)2966),true,"GRRRRRRRR"),
     VETION_JR_27650("Vet'ion Jr. 27650","Vet'ion Jr.",ItemID.VETION_JR_27650,Lists.newArrayList(28299),5505,5497,5497,45,30,30,null,true,"GRRRRRRRR"),
     VETION_JR_27651("Vet'ion Jr. 27651","Vet'ion Jr.",ItemID.VETION_JR_27651,Lists.newArrayList(28299),5505,5497,5497,45,30,30,Lists.newArrayList((short)55184,(short)54926,(short)54693,(short)55190,(short)54571,(short)54804  ,(short)4019,(short)4007,(short)4007,(short)3879,(short)4023,(short)2966),true,"GRRRRRRRR"),
 
+    SCORPIAS_OFFSPRING("Scorpia's offspring","Scorpia's offspring",ItemID.SCORPIAS_OFFSPRING,Lists.newArrayList(29193),6258,6257,6257,280,30,30,Lists.newArrayList((short)142,(short)4525,(short)4636,(short)4884,(short)4645  ,(short)28,(short)16,(short)16,(short)16,(short)16),false,"GRRRRRRRR"),
+
+    TZREK_JAD("TzRek-Jad","TzRek-Jad",ItemID.TZREKJAD,Lists.newArrayList(9319),2650,5805,5805,20,60,-1,null,true,"GRRRRRRRR"),
+    JALREK_JAD("JalRek-Jad","JalRek-Jad",ItemID.JALREKJAD,Lists.newArrayList(33012),7589,8857,8857,20,-10,-1,null,true,"GRRRRRRRR"),
+
+    HELLPUPPY("Hellpuppy","Hellpuppy",ItemID.HELLPUPPY,Lists.newArrayList(29240),6561,6560,6560,-1,-1,-1,null,false,"GRRRRRRRR"),
+
+    HERON("Heron","Heron",ItemID.HERON,Lists.newArrayList(29756),6772,6774,6774,-1,-1,-1,null,true,"GRRRRRRRR"),
+    GREAT_BLUE_HERON("Great blue heron","Great blue heron",ItemID.GREAT_BLUE_HERON,Lists.newArrayList(41628),6772,6774,6774,-1,-1,-1,null,true,"GRRRRRRRR"),
+
+    BEAVER("Beaver","Beaver",ItemID.BEAVER,Lists.newArrayList(29754),7177,7178,7178,-1,-1,-1,null,false,"GRRRRRRRR"),
+
+    BABY_CHINCHOMPA("Baby Chinchompa","Baby Chinchompa",ItemID.BABY_CHINCHOMPA,Lists.newArrayList(19371),5182,5181,5181,-1,-1,-1,null,true,"GRRRRRRRR"),
+    BABY_CHINCHOMPA_13324("Baby Chinchompa 13324","Baby Chinchompa",ItemID.BABY_CHINCHOMPA_13324,Lists.newArrayList(19371),5182,5181,5181,-1,-1,-1,Lists.newArrayList((short)5169,(short)7343,(short)7335,(short)7339,(short)7343,(short)5165  ,(short)3988,(short)3988,(short)3982,(short)3986,(short)5014,(short)3988),true,"GRRRRRRRR"),
+    BABY_CHINCHOMPA_13325("Baby Chinchompa 13325","Baby Chinchompa",ItemID.BABY_CHINCHOMPA_13325,Lists.newArrayList(19371),5182,5181,5181,-1,-1,-1,Lists.newArrayList((short)5169,(short)7343,(short)7335,(short)7339,(short)7343,(short)5165  ,(short)20,(short)33,(short)12,(short)37,(short)45,(short)49),true,"GRRRRRRRR"),
+    BABY_CHINCHOMPA_13326("Baby Chinchompa 13326","Baby Chinchompa",ItemID.BABY_CHINCHOMPA_13326,Lists.newArrayList(29757),5182,5181,5181,-1,-1,-1,null,true,"GRRRRRRRR"),
+
+    BLOODHOUND("Bloodhound","Bloodhound",ItemID.BLOODHOUND,Lists.newArrayList(31740),7269,7280,7280,-1,-1,-1,null,false,"GRRRRRRRR"),
+
+    ROCKY("Rocky","Rocky",ItemID.ROCKY,Lists.newArrayList(32203),7315,7316,7316,110,-1,-1,null,true,"GRRRRRRRR"),
+    RED("Red","Red",ItemID.RED,Lists.newArrayList(37361),7315,7316,7316,110,-1,-1,null,true,"GRRRRRRRR"),
+    ZIGGY("Ziggy","Ziggy",ItemID.ZIGGY,Lists.newArrayList(14390),7315,7316,7316,110,-1,-1,null,true,"GRRRRRRRR"),
+
+    PHOENIX("Phoenix","Phoenix",ItemID.PHOENIX,Lists.newArrayList(26852),6809,6808,6808,80,40,-1,null,true,"GRRRRRRRR"),
+    PHOENIX_24483("Phoenix 24483","Phoenix",ItemID.PHOENIX_24483,Lists.newArrayList(39148),6809,6808,6808,80,40,-1,null,true,"GRRRRRRRR"),
+    PHOENIX_24484("Phoenix 24484","Phoenix",ItemID.PHOENIX_24484,Lists.newArrayList(39146),6809,6808,6808,80,40,-1,Lists.newArrayList((short)4894,(short)4647,(short)5669,(short)6053,(short)5066,(short)5053  ,(short)43943,(short)41907,(short)39855,(short)38715,(short)39855,(short)38860),true,"GRRRRRRRR"),
+    PHOENIX_24485("Phoenix 24485","Phoenix",ItemID.PHOENIX_24485,Lists.newArrayList(39149),6809,6808,6808,80,40,-1,Lists.newArrayList((short)4894,(short)4647,(short)5669,(short)6053,(short)5066,(short)5053  ,(short)20,(short)33,(short)49,(short)20,(short)74,(short)86),true,"GRRRRRRRR"),
+    PHOENIX_24486("Phoenix 24486","Phoenix",ItemID.PHOENIX_24486,Lists.newArrayList(39147),6809,6808,6808,80,40,-1,Lists.newArrayList((short)4894,(short)4647,(short)5669,(short)6053,(short)5066,(short)5053  ,(short)48819,(short)48844,(short)48844,(short)50006,(short)48844,(short)50904),true,"GRRRRRRRR"),
+
+    OLMLET("Olmlet","Olmlet",ItemID.OLMLET,Lists.newArrayList(32697),7396,7395,7395,64,-1,-1,null,true,"GRRRRRRRR"),
+    PUPPADILE("Puppadile","Puppadile",ItemID.PUPPADILE,Lists.newArrayList(32681),7417,7982,7982,45,-1,-1,null,true,"GRRRRRRRR"),
+    TEKTINY("Tektiny","Tektiny",ItemID.TEKTINY,Lists.newArrayList(32682),7476,7983,7983,25,10,5,null,true,"GRRRRRRRR"),
+    ENRAGED_TEKTINY("Enraged Tektiny","Enraged Tektiny",ItemID.ENRAGED_TEKTINY,Lists.newArrayList(32682),7485,8637,8637,25,10,5,null,true,"GRRRRRRRR"),
+    VANGUARD("Vanguard","Vanguard",ItemID.VANGUARD,Lists.newArrayList(32684),7430,7984,7984,40,-1,-1,null,true,"GRRRRRRRR"),
+    VASA_MINIRIO("Vasa Minirio","Vasa Minirio",ItemID.VASA_MINIRIO,Lists.newArrayList(32680),7416,7985,7985,20,-1,-1,null,true,"GRRRRRRRR"),
+    VESPINA("Vespina","Vespina",ItemID.VESPINA,Lists.newArrayList(32689),7449,7986,7986,20,-1,-1,null,true,"GRRRRRRRR"),
+    FLYING_VESPINA("Flying Vespina","Flying Vespina",ItemID.FLYING_VESPINA,Lists.newArrayList(32689),8639,8639,8639,20,-1,-1,null,true,"GRRRRRRRR"),
+
+    SKOTOS("Skotos","Skotos",ItemID.SKOTOS,Lists.newArrayList(31653),6935,4070,4070,20,30,30,null,false,"GRRRRRRRR"),
+
+    HERBI("Herbi","Herbi",ItemID.HERBI,Lists.newArrayList(33890),7694,7695,7695,110,-1,-1,Lists.newArrayList((short)19992,(short)20364,(short)19988,(short)20422  ,(short)6049,(short)6040,(short)4781,(short)4038),false,"GRRRRRRRR"),
+
+    NOON("Noon","Noon",ItemID.NOON,Lists.newArrayList(34183),7768,7768,7768,34,-1,-1,null,true,"GRRRRRRRR"),
+    MIDNIGHT("Midnight","Midnight",ItemID.MIDNIGHT,Lists.newArrayList(34187),7807,7806,7806,34,-1,-1,null,true,"GRRRRRRRR"),
+
+    VORKI("Vorki","Vorki",ItemID.VORKI,Lists.newArrayList(35023),7948,7959,7959,16,-1,-1,null,false,"GRRRRRRRR"),
+
+    LIL_ZIK("Lil' Zik","Lil' Zik",ItemID.LIL_ZIK,Lists.newArrayList(35381),8120,8122,8122,20,-1,-1,null,true,"GRRRRRRRR"),
+    LIL_MAIDEN("Lil' Maiden","Lil' Maiden",ItemID.LIL_MAIDEN,Lists.newArrayList(42280),8090,8090,8090,30,-1,-1,null,true,"GRRRRRRRR"),
+    LIL_BLOAT("Lil' Bloat","Lil' Bloat",ItemID.LIL_BLOAT,Lists.newArrayList(35404),8080,9031,9031,25,-1,-1,null,true,"GRRRRRRRR"),
+    LIL_NYLO("Lil' Nylo","Lil' Nylo",ItemID.LIL_NYLO,Lists.newArrayList(35183),8002,8003,8003,35,-1,-1,null,true,"GRRRRRRRR"),
+    LIL_SOT("Lil' Sot","Lil' Sot",ItemID.LIL_SOT,Lists.newArrayList(35403),8137,9032,9032,30,-1,-1,null,true,"GRRRRRRRR"),
+    LIL_XARP("Lil' Xarp","Lil' Xarp",ItemID.LIL_XARP,Lists.newArrayList(35383),9033,9033,9033,20,-1,-1,null,true,"GRRRRRRRR"),
 
 
+    IKKLE_HYDRA("Ikkle Hydra","Ikkle Hydra",ItemID.IKKLE_HYDRA,Lists.newArrayList(36185),8233,8296,8296,20,-1,-1,null,true,"GRRRRRRRR"),
+    IKKLE_HYDRA_22748("Ikkle Hydra 22748","Ikkle Hydra",ItemID.IKKLE_HYDRA_22748,Lists.newArrayList(36192),8298,8297,8297,20,-1,-1,null,true,"GRRRRRRRR"),
+    IKKLE_HYDRA_22750("Ikkle Hydra 22750","Ikkle Hydra",ItemID.IKKLE_HYDRA_22750,Lists.newArrayList(36188),8247,8299,8299,20,-1,-1,null,true,"GRRRRRRRR"),
+    IKKLE_HYDRA_22752("Ikkle Hydra 22752","Ikkle Hydra",ItemID.IKKLE_HYDRA_22752,Lists.newArrayList(36191),8254,8300,8300,20,-1,-1,null,true,"GRRRRRRRR"),
 
 
+    SRARACHA("Sraracha","Sraracha",ItemID.SRARACHA,Lists.newArrayList(37292),8320,8319,8319,48,30,30,null,true,"GRRRRRRRR"),
+    SRARACHA_25842("Sraracha 25842","Sraracha",ItemID.SRARACHA_25842,Lists.newArrayList(37291),8320,8319,8319,48,30,30,Lists.newArrayList((short)229,(short)348,(short)412,(short)555,(short)670  ,(short)36069,(short)35041,(short)3505,(short)5945,(short)4007),true,"GRRRRRRRR"),
+    SRARACHA_25843("Sraracha 25843","Sraracha",ItemID.SRARACHA_25843,Lists.newArrayList(37290),8320,8319,8319,48,30,30,Lists.newArrayList((short)229,(short)348,(short)412,(short)555,(short)670  ,(short)36069,(short)35041,(short)39219,(short)39611,(short)39719),true,"GRRRRRRRR"),
 
+    YOUNGLLEF("Youngllef","Youngllef",ItemID.YOUNGLLEF,Lists.newArrayList(38596),8417,8428,8428,25,-1,-1,null,true,"GRRRRRRRR"),
+    CORRUPTED_YOUNGLLEF("Corrupted Youngllef","Corrupted Youngllef",ItemID.CORRUPTED_YOUNGLLEF,Lists.newArrayList(38597),8417,8428,8428,25,-1,-1,null,true,"GRRRRRRRR"),
 
+    SMOLCANO("Smolcano","Smolcano",ItemID.SMOLCANO,Lists.newArrayList(38592),8429,8447,8447,30,-1,-1,null,false,"GRRRRRRRR"),
+
+    LITTLE_PARASITE("Little Parasite","Little Parasite",ItemID.LITTLE_PARASITE,Lists.newArrayList(39210),8553,8553,8553,40,-1,-1,null,true,"GRRRRRRRR"),
+
+    LIL_CREATOR("Lil' Creator","Lil' Creator",ItemID.LIL_CREATOR,Lists.newArrayList(41240),8842,8846,8846,24,-1,-1,null,true,"GRRRRRRRR"),
+    LIL_DESTRUCTOR("Lil' Destructor","Lil' Destructor",ItemID.LIL_DESTRUCTOR,Lists.newArrayList(41242),3079,8847,8847,24,-1,-1,null,true,"GRRRRRRRR"),
+
+    TINY_TEMPOR("Tiny Tempor","Tiny Tempor",ItemID.TINY_TEMPOR,Lists.newArrayList(41812),8895,8895,8895,24,-1,-1,null,false,"GRRRRRRRR"),
+
+    NEXLING("Nexling","Nexling",ItemID.NEXLING,Lists.newArrayList(43209),9177,9176,9176,48,-1,-1,null,false,"GRRRRRRRR"),
+
+    ABYSSAL_PROTECTOR("Abyssal protector","Abyssal protector",ItemID.ABYSSAL_PROTECTOR,Lists.newArrayList(44070),2185,2184,2184,80,-1,-1,null,false,"GRRRRRRRR"),
+
+    TUMEKENS_GUARDIAN("Tumeken's Guardian","Tumeken's Guardian",ItemID.TUMEKENS_GUARDIAN,Lists.newArrayList(46337),9655,9651,9651,65,-1,-1,null,true,"GRRRRRRRR"),
+    TUMEKENS_DAMAGED_GUARDIAN("Tumeken's Damaged Guardian","Tumeken's Damaged Guardian",ItemID.TUMEKENS_DAMAGED_GUARDIAN,Lists.newArrayList(46333),9420,9420,9420,65,-1,-1,null,true,"GRRRRRRRR"),
+    ELIDINIS_GUARDIAN("Elidinis' Guardian","Elidinis' Guardian",ItemID.ELIDINIS_GUARDIAN,Lists.newArrayList(46332),9656,9652,9652,65,-1,-1,null,true,"GRRRRRRRR"),
+    ELIDINIS_DAMAGED_GUARDIAN("Elidinis' Damaged Guardian","Elidinis' Damaged Guardian",ItemID.ELIDINIS_DAMAGED_GUARDIAN,Lists.newArrayList(46332),9420,9420,9420,65,-1,-1,null,true,"GRRRRRRRR"),
+    //check for 180 rotate for below
+    AKKHITO("Akkhito","Akkhito",ItemID.AKKHITO,Lists.newArrayList(46360,46356,46357),9760,9421,9421,58,-1,-1,null,true,"GRRRRRRRR"),
+    BABI("Babi","Babi",ItemID.BABI,Lists.newArrayList(46352,46350),9741,9739,9739,36,-1,-1,null,true,"GRRRRRRRR"),
+    KEPHRITI("Kephriti","Kephriti",ItemID.KEPHRITI,Lists.newArrayList(46417),9572,9419,9419,38,-1,40,null,true,"GRRRRRRRR"),
+    ZEBO("Zebo","Zebo",ItemID.ZEBO,Lists.newArrayList(46509),2037,2036,2036,112,-1,-1,null,true,"GRRRRRRRR"),
+
+    MUPHIN("Muphin","Muphin",ItemID.MUPHIN,Lists.newArrayList(47149),9913,9915,9915,25,-1,-1,null,true,"GRRRRRRRR"),
+    MUPHIN_27592("Muphin 27592","Muphin",ItemID.MUPHIN_27592,Lists.newArrayList(47147),9913,9915,9915,25,-1,-1,null,true,"GRRRRRRRR"),
+    MUPHIN_27593("Muphin 27593","Muphin",ItemID.MUPHIN_27593,Lists.newArrayList(47156),9913,9915,9915,25,-1,-1,null,true,"GRRRRRRRR"),
 
 
 

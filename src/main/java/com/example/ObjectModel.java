@@ -8,6 +8,9 @@ import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ClientTick;
 
+import javax.inject.Inject;
+import java.awt.*;
+
 
 public class ObjectModel
 {
@@ -209,8 +212,9 @@ public class ObjectModel
 				this.lastDistance = targetQueue[cTargetIndex].currentDistance;
 
 				LocalPoint currentPosition = rlObject.getLocation();
-				int dx = targetPosition.getX() - currentPosition.getX();
+				int dx = targetPosition.getX()  - currentPosition.getX();
 				int dy = targetPosition.getY() - currentPosition.getY();
+
 				
 				// are we not where we need to be?
 				if (dx != 0 || dy != 0)
@@ -233,7 +237,10 @@ public class ObjectModel
 
 					}
 
-					LocalPoint newLocation = new LocalPoint(currentPosition.getX() + dx, currentPosition.getY() + dy);
+
+					LocalPoint newLocation = new LocalPoint(currentPosition.getX() + dx , currentPosition.getY() + dy);
+
+
 					rlObject.setLocation(newLocation, targetPlane);
 
 					dx = targetPosition.getX() - rlObject.getLocation().getX();

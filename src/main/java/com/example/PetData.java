@@ -67,6 +67,59 @@ public enum PetData {
     DARK_SQUIRREL("Dark Squirrel","Dark Squirrel",ItemID.DARK_SQUIRREL,Lists.newArrayList(32206),7309,7310,7310,110,-1,-1,Lists.newArrayList((short)38160,(short)38156,(short)3633,(short)3290,(short)3623,(short)4430  ,(short)24,(short)12,(short)668,(short)24,(short)673,(short)12),true,"GRRRRRRRR"),
 
 
+    ROCK_GOLEM("Rock Golem","Rock Golem",ItemID.ROCK_GOLEM,Lists.newArrayList(29755),7180,7181,7181,-1,-1,10,null,true,"GRRRRRRRR"),
+    ROCK_GOLEM_21187("Rock Golem 21187","Rock Golem",ItemID.ROCK_GOLEM_21187,Lists.newArrayList(29755),7180,7181,7181,-1,-1,10,Lists.newArrayList((short)6823,(short)6697,(short)6819,(short)6814,(short)6682,(short)5656  ,(short)66,(short)61,(short)49,(short)53,(short)53,(short)49),true,"GRRRRRRRR"),
+    ROCK_GOLEM_21188("Rock Golem 21188","Rock Golem",ItemID.ROCK_GOLEM_21188,Lists.newArrayList(29755),7180,7181,7181,-1,-1,10,Lists.newArrayList((short)6823,(short)6697,(short)6819,(short)6814,(short)6682,(short)5656  ,(short)4044,(short)3912,(short)3906,(short)3901,(short)3897,(short)4021),true,"GRRRRRRRR"),
+    ROCK_GOLEM_21189("Rock Golem 21189","Rock Golem",ItemID.ROCK_GOLEM_21189,Lists.newArrayList(29755),7180,7181,7181,-1,-1,10,Lists.newArrayList((short)6823,(short)6697,(short)6819,(short)6814,(short)6682,(short)5656  ,(short)2337,(short)2332,(short)2328,(short)2452,(short)3346,(short)3470),true,"GRRRRRRRR"),
+    ROCK_GOLEM_21190("Rock Golem 21190","Rock Golem",ItemID.ROCK_GOLEM_21190,Lists.newArrayList(29755),7180,7181,7181,-1,-1,10,Lists.newArrayList((short)6823,(short)6697,(short)6819,(short)6814,(short)6682,(short)5656  ,(short)43235,(short)43233,(short)43486,(short)43482,(short)43862,(short)43730),true,"GRRRRRRRR"),
+    ROCK_GOLEM_21191("Rock Golem 21191","Rock Golem",ItemID.ROCK_GOLEM_21191,Lists.newArrayList(29755),7180,7181,7181,-1,-1,10,Lists.newArrayList((short)6823,(short)6697,(short)6819,(short)6814,(short)6682,(short)5656  ,(short)43105,(short)43100,(short)43096,(short)43092,(short)43088,(short)43084),true,"GRRRRRRRR"),
+    ROCK_GOLEM_21192("Rock Golem 21192","Rock Golem",ItemID.ROCK_GOLEM_21192,Lists.newArrayList(29755),7180,7181,7181,-1,-1,10,Lists.newArrayList((short)6823,(short)6697,(short)6819,(short)6814,(short)6682,(short)5656  ,(short)10388,(short)10512,(short)10508,(short)10378,(short)8,(short)4),true,"GRRRRRRRR"),
+    ROCK_GOLEM_21193("Rock Golem 21193","Rock Golem",ItemID.ROCK_GOLEM_21193,Lists.newArrayList(29755),7180,7181,7181,-1,-1,10,Lists.newArrayList((short)6823,(short)6697,(short)6819,(short)6814,(short)6682,(short)5656  ,(short)8134,(short)8128,(short)7104,(short)7101,(short)7099,(short)7097),true,"GRRRRRRRR"),
+    ROCK_GOLEM_21194("Rock Golem 21194","Rock Golem",ItemID.ROCK_GOLEM_21194,Lists.newArrayList(29755),7180,7181,7181,-1,-1,10,Lists.newArrayList((short)6823,(short)6697,(short)6819,(short)6814,(short)6682,(short)5656  ,(short)43181,(short)43177,(short)43173,(short)43297,(short)43292,(short)43288),true,"GRRRRRRRR"),
+    ROCK_GOLEM_21195("Rock Golem 21195","Rock Golem",ItemID.ROCK_GOLEM_21195,Lists.newArrayList(29755),7180,7181,7181,-1,-1,10,Lists.newArrayList((short)6823,(short)6697,(short)6819,(short)6814,(short)6682,(short)5656  ,(short)4550,(short)4548,(short)4544,(short)4539,(short)4535,(short)2487),true,"GRRRRRRRR"),
+    ROCK_GOLEM_21196("Rock Golem 21196","Rock Golem",ItemID.ROCK_GOLEM_21196,Lists.newArrayList(29755),7180,7181,7181,-1,-1,10,Lists.newArrayList((short)6823,(short)6697,(short)6819,(short)6814,(short)6682,(short)5656  ,(short)21675,(short)21671,(short)21667,(short)21662,(short)21658,(short)21782),true,"GRRRRRRRR"),
+    ROCK_GOLEM_21197("Rock Golem 21197","Rock Golem",ItemID.ROCK_GOLEM_21197,Lists.newArrayList(29755),7180,7181,7181,-1,-1,10,Lists.newArrayList((short)6823,(short)6697,(short)6819,(short)6814,(short)6682,(short)5656  ,(short)36145,(short)36141,(short)36137,(short)36133,(short)36257,(short)36252),true,"GRRRRRRRR"),
+    ROCK_GOLEM_21198("Rock Golem 21198","Rock Golem",ItemID.ROCK_GOLEM_21340,Lists.newArrayList(29755),7180,7181,7181,-1,-1,10,Lists.newArrayList((short)6823,(short)6697,(short)6819,(short)6814,(short)6682,(short)5656  ,(short)63830,(short)62800,(short)63692,(short)60624,(short)63675,(short)63663),true,"GRRRRRRRR"),
+    ROCK_GOLEM_21199("Rock Golem 21199","Rock Golem",ItemID.ROCK_GOLEM_21358,Lists.newArrayList(29755),7180,7181,7181,-1,-1,10,Lists.newArrayList((short)6823,(short)6697,(short)6819,(short)6814,(short)6682,(short)5656  ,(short)805,(short)929,(short)798,(short)796,(short)790,(short)912),true,"GRRRRRRRR"),
+    ROCK_GOLEM_21200("Rock Golem 21200","Rock Golem",ItemID.ROCK_GOLEM_21359,Lists.newArrayList(29755),7180,7181,7181,-1,-1,10,Lists.newArrayList((short)6823,(short)6697,(short)6819,(short)6814,(short)6682,(short)5656  ,(short)50999,(short)50995,(short)50993,(short)49967,(short)50087,(short)51098),true,"GRRRRRRRR"),
+    ROCK_GOLEM_21201("Rock Golem 21201","Rock Golem",ItemID.ROCK_GOLEM_21360,Lists.newArrayList(29755),7180,7181,7181,-1,-1,10,Lists.newArrayList((short)6823,(short)6697,(short)6819,(short)6814,(short)6682,(short)5656  ,(short)31531,(short)31655,(short)31651,(short)31518,(short)31640,(short)30612),true,"GRRRRRRRR"),
+
+
+    ZILYANA_JR("Zilyana Jr.","Zilyana Jr.",ItemID.PET_ZILYANA,Lists.newArrayList(27989,27937,27985,27968,27990),6966,6965,6965,60,30,30,null,false,"GRRRRRRRR"),
+
+    KRIL_TSUTSAROTH_JR("K'ril Tsutsaroth Jr.","K'ril Tsutsaroth Jr.",ItemID.PET_KRIL_TSUTSAROTH,Lists.newArrayList(27683,27681,27692,27682,27690),6935,4070,4070,20,30,30,null,false,"GRRRRRRRR"),
+
+    PENANCE_PET("Penance Pet","Penance Pet",ItemID.PET_PENANCE_QUEEN,Lists.newArrayList(20717,20715,20714,20709,20713,20712,20711,20710,20716),5410,5409,5409,29,30,30,null,false,"GRRRRRRRR"),
+
+    BABY_MOLE("Baby Mole","Baby Mole",ItemID.BABY_MOLE,Lists.newArrayList(42012),3309,3313,3313,90,30,30,null,true,"GRRRRRRRR"),
+    BABY_MOLE_RAT("Baby Mole-rat","Baby Mole-rat",ItemID.BABY_MOLERAT,Lists.newArrayList(42012),3309,3313,3313,90,30,30,Lists.newArrayList((short)5388,(short)5392,(short)5268,(short)5272,(short)5276,(short)4558  ,(short)317,(short)322,(short)326,(short)328,(short)332,(short)63706),true,"GRRRRRRRR"),
+
+
+    PRINCE_BLACK_DRAGON("Prince Black Dragon","Prince Black Dragon",ItemID.PRINCE_BLACK_DRAGON,Lists.newArrayList(17414,17415,17429,17422,17423),90,4635,4635,40,30,30,null,false,"GRRRRRRRR"),
+
+    KALPHITE_PRINCESS("Kalphite Princess","Kalphite Princess",ItemID.KALPHITE_PRINCESS,Lists.newArrayList(24597,24598),6239,6238,4635,45,30,30,null,true,"GRRRRRRRR"),
+    KALPHITE_PRINCESS_6637("Kalphite Princess 6637","Kalphite Princess",ItemID.KALPHITE_PRINCESS_12654,Lists.newArrayList(24602,24605,24606),6236,6236,6236,45,30,30,null,true,"GRRRRRRRR"),
+
+    PET_SMOKE_DEVIL("Pet Smoke Devil","Pet Smoke Devil",ItemID.PET_SMOKE_DEVIL,Lists.newArrayList(28442),1829,1828,1828,60,25,25,null,true,"GRRRRRRRR"),
+    PET_SMOKE_DEVIL_6655("Pet Smoke Devil 6655","Pet Smoke Devil",ItemID.PET_SMOKE_DEVIL_22663,Lists.newArrayList(36012),1829,1828,1828,35,25,25,null,true,"GRRRRRRRR"),
+
+    KRAKEN("Kraken","Kraken",ItemID.PET_KRAKEN,Lists.newArrayList(28231),3989,3989,3989,15,30,30,null,false,"GRRRRRRRR"),
+
+    DARK_CORE("Dark core","Dark core",ItemID.PET_DARK_CORE,Lists.newArrayList(11069),7980,2417,2417,83,30,30,null,true,"GRRRRRRRR"),
+    CORPOREAL_CRITTER("Corporeal Critter","Corporeal Critter",ItemID.PET_CORPOREAL_CRITTER,Lists.newArrayList(11056),1678,7974,7974,64,30,30,null,true,"GRRRRRRRR"),
+
+    CHOMPY_CHICK("Chompy chick","Chompy chick",ItemID.CHOMPY_CHICK,Lists.newArrayList(26861),6764,6765,6765,83,30,30,null,false,"GRRRRRRRR"),
+
+    VENENATIS_SPIDERLING("Venenatis spiderling","Venenatis spiderling",ItemID.VENENATIS_SPIDERLING,Lists.newArrayList(47393),9986,9987,9987,58,30,30,null,true,"GRRRRRRRR"),
+    VENENATIS_SPIDERLING_27648("Venenatis spiderling 27648","Venenatis spiderling",ItemID.VENENATIS_SPIDERLING_27648,Lists.newArrayList(28294,28295),5326,5325,5325,60,30,30,null,true,"GRRRRRRRR"),
+
+    CALLISTO_CUB("Callisto cub","Callisto cub",ItemID.CALLISTO_CUB,Lists.newArrayList(47396),10011,10010,10010,16,30,30,null,true,"GRRRRRRRR"),
+    CALLISTO_CUB_27649("Callisto cub 27649","Callisto cub",ItemID.CALLISTO_CUB_27649,Lists.newArrayList(27649),4919,4923,4923,35,30,30,null,true,"GRRRRRRRR"),
+
+    VETION_JR("Vet'ion Jr.","Vet'ion Jr.",ItemID.VETION_JR,Lists.newArrayList(47387,47384),9965,9967,9967,54,30,30,null,true,"GRRRRRRRR"),
+    VETION_JR_13180("Vet'ion Jr. 13180","Vet'ion Jr.",ItemID.VETION_JR_13180,Lists.newArrayList(47383,47385,47388,47389),9965,9967,9967,54,30,30,Lists.newArrayList((short)55184,(short)54926,(short)54693,(short)55190,(short)54571,(short)54804  ,(short)4019,(short)4007,(short)4007,(short)3879,(short)4023,(short)2966),true,"GRRRRRRRR"),
+    VETION_JR_27650("Vet'ion Jr. 27650","Vet'ion Jr.",ItemID.VETION_JR_27650,Lists.newArrayList(28299),5505,5497,5497,45,30,30,null,true,"GRRRRRRRR"),
+    VETION_JR_27651("Vet'ion Jr. 27651","Vet'ion Jr.",ItemID.VETION_JR_27651,Lists.newArrayList(28299),5505,5497,5497,45,30,30,Lists.newArrayList((short)55184,(short)54926,(short)54693,(short)55190,(short)54571,(short)54804  ,(short)4019,(short)4007,(short)4007,(short)3879,(short)4023,(short)2966),true,"GRRRRRRRR"),
 
 
 

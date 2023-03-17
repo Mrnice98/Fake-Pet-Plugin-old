@@ -32,6 +32,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static com.example.ObjectModel.radToJau;
@@ -668,10 +669,11 @@ public class ExamplePlugin extends Plugin
 						points.add(worldPoint);
 					}
 
+
 				}
 				if (worldArea.canTravelInDirection(client,0,i))
 				{
-					WorldPoint worldPoint = new WorldPoint(worldArea.getX(),worldArea.getY() + 1,client.getPlane());
+					WorldPoint worldPoint = new WorldPoint(worldArea.getX(),worldArea.getY() + i,client.getPlane());
 					if (!worldPoint.equals(client.getLocalPlayer().getWorldLocation()))
 					{
 						points.add(worldPoint);

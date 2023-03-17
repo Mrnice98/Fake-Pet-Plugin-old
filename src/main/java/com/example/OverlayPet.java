@@ -47,14 +47,14 @@ public class OverlayPet extends Overlay
 
             WorldPoint wp = new WorldPoint(plugin.nextTravellingPoint.getX(),plugin.nextTravellingPoint.getY(),client.getPlane());
             LocalPoint point = LocalPoint.fromWorld(client,wp);
-            graphics.draw(Perspective.getCanvasTilePoly(client,point));
+           // graphics.draw(Perspective.getCanvasTilePoly(client,point));
 
 
-           // graphics.setFont(FontManager.getRunescapeBoldFont());
+            graphics.setFont(FontManager.getRunescapeBoldFont());
 
             if (plugin.wizard.getRlObject() != null && plugin.cutScene && plugin.wizard.isActive())
             {
-                Point canvasPoint2 = Perspective.getCanvasTextLocation(client,graphics,plugin.wizard.getLocalLocation(),plugin.message,plugin.wizard.getHeight() + 45);
+                Point canvasPoint2 = Perspective.getCanvasTextLocation(client,graphics,plugin.wizard.getLocalLocation(),plugin.message,client.getLocalPlayer().getLogicalHeight());
                 OverlayUtil.renderTextLocation(graphics,canvasPoint2,plugin.message,Color.YELLOW);
             }
 

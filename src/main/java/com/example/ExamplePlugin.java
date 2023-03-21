@@ -1,7 +1,9 @@
 package com.example;
 
+import com.example.dialog.DialogNode;
 import com.example.dialog.DialogProvider;
 import com.example.dialog.FakeDialogManager;
+import com.google.common.util.concurrent.Runnables;
 import com.google.inject.Provides;
 import javax.inject.Inject;
 import javax.swing.*;
@@ -513,10 +515,40 @@ public class ExamplePlugin extends Plugin
 	}
 
 
+	private DialogNode provideDialog()
+	{
+		String dataString = petData.getDryestPerson();
+		String name = dataString.substring(dataString.lastIndexOf(">") + 1,dataString.indexOf(":")).replaceAll(":","").replaceAll(" ","");
+		String kc = dataString.substring(dataString.indexOf(":"),dataString.lastIndexOf(":")).replaceAll(":","").replaceAll(" ","");
+		String date = dataString.substring(dataString.lastIndexOf(":")).replaceAll(":","");
+		String kcIdentifer = dataString.substring(1,dataString.lastIndexOf(">"));
+
+
+		return DialogNode.builder()
+				.player()
+				.animationId(567)
+				.body("Tell me something to make me feel better")
+				.onContinue
+						(() ->
+								DialogNode.builder()
+										.npc(NpcID.CORPOREAL_CRITTER_8010)
+										.title(petData.getName())
+										.body("It took " + name +" "+ kc + " " + kcIdentifer +"<br>" +
+												"They finally got me on" + date)
+										.animationId(610)
+										.build()
+
+
+						)
+				.build();
+	}
+
 
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked event)
 	{
+
+
 
 		if (petData == null)
 		{
@@ -534,6 +566,13 @@ public class ExamplePlugin extends Plugin
 			}
 		}
 
+		if (event.getMenuEntry().getType() == MenuAction.RUNELITE && event.getMenuTarget().contains(petData.getName()) && event.getMenuOption().equals("Examine"))
+		{
+			if (pet.isActive())
+			{
+				client.addChatMessage(ChatMessageType.GAMEMESSAGE,"",petData.getExamine(),"",false);
+			}
+		}
 
 
 		if (event.getMenuEntry().getType() == MenuAction.RUNELITE && event.getMenuTarget().contains(petData.getName()) && event.getMenuOption().equals("Metamorphosis"))
@@ -550,7 +589,8 @@ public class ExamplePlugin extends Plugin
 			if (pet.isActive() && pet.getWorldLocation().toWorldArea().isInMeleeDistance(client.getLocalPlayer().getWorldArea()))
 			{
 				dialogOpen = true;
-				fakeDialogManager.open(dialogProvider.CALL_THE_WIZARD);
+				fakeDialogManager.open(provideDialog());
+				//fakeDialogManager.open(dialogProvider.CALL_THE_WIZARD);
 			}
 		}
 

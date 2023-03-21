@@ -5,6 +5,7 @@ package com.example;
 
 import net.runelite.api.*;
 import net.runelite.api.coords.LocalPoint;
+import net.runelite.api.coords.WorldArea;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ClientTick;
 
@@ -64,10 +65,16 @@ public class ObjectModel
 	{
 		return rlObject;
 	}
+
+	public WorldArea getWorldArea()
+	{
+		return new WorldArea(WorldPoint.fromLocal(client,rlObject.getLocation()),2,2);
+	}
 	
-	public void spawn(WorldPoint position, int jauOrientation)
+	public void spawn(WorldPoint position, int jauOrientation, int size)
 	{
 		LocalPoint localPosition = LocalPoint.fromWorld(client, position);
+
 		if (localPosition != null && client.getPlane() == position.getPlane())
 		{
 			rlObject.setLocation(localPosition, position.getPlane());
@@ -128,13 +135,24 @@ public class ObjectModel
 
 	
 	// moveTo() adds target movement states to the queue for later per-frame updating for rendering in onClientTick()
-	public void moveTo(WorldPoint worldPosition, int jauOrientation)
+	public void moveTo(WorldPoint worldPosition, int jauOrientation, int size)
 	{
+
+
+
 
 		if (!rlObject.isActive())
 		{
-			spawn(worldPosition, jauOrientation);
+			spawn(worldPosition, jauOrientation, size);
 		}
+
+		LocalPoint localPosition = LocalPoint.fromWorld(client, worldPosition);
+		if (size == 2)
+		{
+			localPosition = new LocalPoint(localPosition.getX() + 64,localPosition.getY() + 64);
+			worldPosition = WorldPoint.fromLocal(client,localPosition);
+		}
+
 
 		// just clear the queue and move immediately to the destination if many ticks behind
 		if (targetQueueSize >= MAX_TARGET_QUEUE_SIZE - 2)
@@ -145,7 +163,11 @@ public class ObjectModel
 
 		int prevTargetIndex = (cTargetIndex + targetQueueSize - 1) % MAX_TARGET_QUEUE_SIZE;
 		int newTargetIndex = (cTargetIndex + targetQueueSize) % MAX_TARGET_QUEUE_SIZE;
-		LocalPoint localPosition = LocalPoint.fromWorld(client, worldPosition);
+
+//		LocalPoint localPosition = LocalPoint.fromWorld(client, worldPosition);
+//		localPosition = new LocalPoint(localPosition.getX() + 64,localPosition.getY() + 64);
+//		worldPosition = WorldPoint.fromLocal(client,localPosition);
+
 
 		if (localPosition == null)
 		{
@@ -159,16 +181,17 @@ public class ObjectModel
 		}
 		else
 		{
-			prevWorldPosition = WorldPoint.fromLocal(client, rlObject.getLocation());
+			prevWorldPosition = WorldPoint.fromLocal(client,rlObject.getLocation());
 		}
 
 		int distance = prevWorldPosition.distanceTo(worldPosition);
 
 		this.targetQueue[newTargetIndex].wpDest = worldPosition;
-		this.targetQueue[newTargetIndex].lpDest = LocalPoint.fromWorld(client,worldPosition);
+		this.targetQueue[newTargetIndex].lpDest = localPosition;
 		this.targetQueue[newTargetIndex].currentDistance = distance;
 
 	}
+
 
 
 	// onClientTick() updates the per-frame state needed for rendering actor movement
@@ -187,7 +210,6 @@ public class ObjectModel
 
 				LocalPoint targetPosition = targetQueue[cTargetIndex].lpDest;
 
-
 				if (client.getPlane() != targetPlane || targetPosition == null || !targetPosition.isInScene())
 				{
 					// this actor is no longer in a visible area on our client, so let's despawn it
@@ -196,9 +218,14 @@ public class ObjectModel
 				}
 
 				//apply animation if move-speed / distance has changed
+
+
+
+
 				if (lastDistance != targetQueue[cTargetIndex].currentDistance)
 				{
 					int distance = targetQueue[cTargetIndex].currentDistance;
+
 					// we don't want to go beyond run (speed of 2)
 					rlObject.setAnimation(distance > 2 ? null : animationPoses[distance]);
 

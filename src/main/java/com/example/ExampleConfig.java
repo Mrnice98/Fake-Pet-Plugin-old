@@ -16,4 +16,15 @@ public interface ExampleConfig extends Config
 	{
 		return PetData.ABYSSAL_ORPHAN;
 	}
+
+	@ConfigItem(
+			keyName = "filter",
+			name = "Filter",
+			description = "Filter",
+			hidden = true
+	)
+	default boolean filter()
+	{
+		return true;
+	}
 }

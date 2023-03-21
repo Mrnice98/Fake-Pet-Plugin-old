@@ -1,15 +1,18 @@
 package com.example;
 
+import jdk.vm.ci.meta.Local;
 import net.runelite.api.Client;
 import net.runelite.api.Perspective;
 import net.runelite.api.Point;
 import net.runelite.api.coords.LocalPoint;
+import net.runelite.api.coords.WorldArea;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.overlay.*;
 
 import javax.inject.Inject;
 import java.awt.*;
+import java.util.List;
 
 public class OverlayPet extends Overlay
 {
@@ -27,6 +30,7 @@ public class OverlayPet extends Overlay
         setPosition(OverlayPosition.DYNAMIC);
     }
 
+    ObjectModel objectModel;
 
     @Override
     public Dimension render(Graphics2D graphics)
@@ -45,9 +49,10 @@ public class OverlayPet extends Overlay
 
             graphics.draw(plugin.poly);
 
-            WorldPoint wp = new WorldPoint(plugin.nextTravellingPoint.getX(),plugin.nextTravellingPoint.getY(),client.getPlane());
-            LocalPoint point = LocalPoint.fromWorld(client,wp);
-            graphics.draw(Perspective.getCanvasTileAreaPoly(client,point,2));
+
+            graphics.draw(Perspective.getCanvasTileAreaPoly(client,plugin.pet.getLocalLocation(),plugin.petData.getSize()));
+
+
 
 
             graphics.setFont(FontManager.getRunescapeBoldFont());

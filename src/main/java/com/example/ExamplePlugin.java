@@ -5,6 +5,7 @@ import com.example.dialog.FakeDialogManager;
 import com.google.inject.Provides;
 import javax.inject.Inject;
 import javax.swing.*;
+import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
 
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
@@ -113,7 +114,7 @@ public class ExamplePlugin extends Plugin
 	private WorldPoint lastActorWP;
 
 	public WorldArea nextTravellingPoint;
-	private WorldArea petWorldArea = null;
+	public WorldArea petWorldArea = null;
 
 	private Model petModel;
 
@@ -216,20 +217,29 @@ public class ExamplePlugin extends Plugin
 
 		}
 
+		if (pet.getRlObject() == null)
+		{
+			pet.init(client);
+		}
+
 		petModel = provideModel();
 		pet.setPoseAnimations(petData.getIdleAnim(),petData.getWalkAnim(),petData.getRunAnim());
 
-		if (pet.getLocalLocation().distanceTo(LocalPoint.fromWorld(client,nextTravellingPoint.toWorldPoint())) > 0)
+		if (client.getGameState() == GameState.LOGGED_IN && pet.isActive())
 		{
-			pet.setAnimation(pet.animationPoses[1]);
-		}
-		else
-		{
-			pet.setAnimation(pet.animationPoses[0]);
+			//set to 0 for 1x1 and != 90 for 2x2
+			if (pet.getLocalLocation().distanceTo(LocalPoint.fromWorld(client,nextTravellingPoint.toWorldPoint())) > 0 && pet.getLocalLocation().distanceTo(LocalPoint.fromWorld(client,nextTravellingPoint.toWorldPoint())) != 90)
+			{
+				pet.setAnimation(pet.animationPoses[1]);
+			}
+			else
+			{
+				pet.setAnimation(pet.animationPoses[0]);
+			}
+
 		}
 
 		pet.setModel(petModel);
-
 		panel.updateCurrentPetIcon();
 	}
 
@@ -269,12 +279,12 @@ public class ExamplePlugin extends Plugin
 
 			if (lastPlayerWP.distanceTo(client.getLocalPlayer().getWorldLocation()) < 5)
 			{
-				pet.spawn(lastActorWP,lastActorOrientation);
+				pet.spawn(lastActorWP,lastActorOrientation,petData.getSize());
 				pet.setAnimation(pet.animationPoses[0]);
 			}
 			else
 			{
-				pet.spawn(client.getLocalPlayer().getWorldLocation(),radToJau(Math.atan2(intx,inty)));
+				pet.spawn(client.getLocalPlayer().getWorldLocation(),radToJau(Math.atan2(intx,inty)),petData.getSize());
 				pet.setAnimation(pet.animationPoses[0]);
 			}
 
@@ -366,28 +376,26 @@ public class ExamplePlugin extends Plugin
 		if (nextTravellingPoint != null)
 		{
 			petWorldArea = nextTravellingPoint;
-			petWorldArea = new WorldArea(nextTravellingPoint.toWorldPoint(),2,2);
+			petWorldArea = new WorldArea(nextTravellingPoint.toWorldPoint(),petData.getSize(),petData.getSize());
 		}
-
 
 
 		WorldArea worldArea = new WorldArea(playerDelayedLoc,1,1);
 
 
-		pet.getRlObject().setRadius(70);
-		pet.getRlObject().setDrawFrontTilesFirst(true);
-
-
 		nextTravellingPoint = petWorldArea.calculateNextTravellingPoint(client,worldArea,true);
 
-		if (nextTravellingPoint == null && client.getLocalPlayer().getLocalLocation().distanceTo(pet.getLocalLocation()) < 100)
+		//need to adjust the 100 to account for the 2x2 pets
+		//need to get a way to add actors / players as blockers
+		//&& client.getLocalPlayer().getLocalLocation().distanceTo(pet.getLocalLocation()) < 100
+		if (nextTravellingPoint == null)
 		{
-			nextTravellingPoint = new WorldArea(getPathOutWorldPoint(pet.getWorldLocation().toWorldArea()),1,1);
+			nextTravellingPoint = new WorldArea(getPathOutWorldPoint(petWorldArea),petData.getSize(),petData.getSize());
 		}
 
 		if (pet.isActive() && nextTravellingPoint != null && !cutScene)
 		{
-			pet.moveTo(nextTravellingPoint.toWorldPoint(), radToJau(Math.atan2(intx,inty)));
+			pet.moveTo(nextTravellingPoint.toWorldPoint(), radToJau(Math.atan2(intx,inty)),petData.getSize());
 		}
 
 
@@ -417,11 +425,11 @@ public class ExamplePlugin extends Plugin
 
 			if (pet.animationPoses[0].getId() == pet.getRlObject().getAnimation().getId() && overlappingModel)
 			{
-				//pet.setModel(client.loadModel(0));
+				pet.setModel(client.loadModel(0));
 			}
 			else if (!overlappingModel)
 			{
-				//pet.setModel(petModel);
+				pet.setModel(petModel);
 			}
 
 			LocalPoint lp = pet.getLocalLocation();
@@ -431,7 +439,18 @@ public class ExamplePlugin extends Plugin
 
 			if (!cutScene)
 			{
+
 				pet.onClientTick(event);
+				//for 2x2 set drawFontTilesFirst only when they are moveing / test vs walls in house and rimmy
+				if (petData.getSize() == 2 && pet.getRlObject().getAnimation() != pet.animationPoses[0])
+				{
+					pet.getRlObject().setDrawFrontTilesFirst(true);
+				}
+				else
+				{
+					pet.getRlObject().setDrawFrontTilesFirst(false);
+				}
+
 
 			}
 
@@ -507,7 +526,8 @@ public class ExamplePlugin extends Plugin
 
 		if (event.getMenuEntry().getType() == MenuAction.RUNELITE && event.getMenuTarget().contains(petData.getName()) && event.getMenuOption().equals("Pick-up"))
 		{
-			if (pet.isActive() && pet.getWorldLocation().toWorldArea().isInMeleeDistance(client.getLocalPlayer().getWorldArea()))
+			//&& pet.getWorldLocation().toWorldArea().isInMeleeDistance(client.getLocalPlayer().getWorldArea())
+			if (pet.isActive())
 			{
 				petFollowing = false;
 				pet.despawn();
@@ -520,7 +540,7 @@ public class ExamplePlugin extends Plugin
 		{
 			if (pet.isActive())
 			{
-				petData = PetData.morphModel.get(petData.getIdentifier());
+				petData = PetData.morphModel.get(petData);
 				updatePet();
 			}
 		}
@@ -562,7 +582,7 @@ public class ExamplePlugin extends Plugin
 			double intx = aWP.toWorldArea().getX() - wp.toWorldArea().getX();
 			double inty = aWP.toWorldArea().getY() - wp.toWorldArea().getY();
 
-			pet.spawn(client.getLocalPlayer().getWorldLocation(),radToJau(Math.atan2(intx,inty)));
+			pet.spawn(client.getLocalPlayer().getWorldLocation(),radToJau(Math.atan2(intx,inty)),petData.getSize());
 			pet.setAnimation(pet.animationPoses[0]);
 			nextTravellingPoint = pet.getWorldLocation().toWorldArea();
 		}
@@ -612,7 +632,7 @@ public class ExamplePlugin extends Plugin
 
 		petFollowing = true;
 
-		pet.spawn(getPathOutWorldPoint(getAndUpdatePlayersDelayedLoc().toWorldArea()),radToJau(Math.atan2(intx,inty)));
+		pet.spawn(getPathOutWorldPoint(new WorldArea(getAndUpdatePlayersDelayedLoc(),petData.getSize(),petData.getSize())),radToJau(Math.atan2(intx,inty)),petData.getSize());
 		pet.setAnimation(pet.animationPoses[0]); //0 == walk
 		nextTravellingPoint = pet.getWorldLocation().toWorldArea();
 	}
@@ -620,8 +640,10 @@ public class ExamplePlugin extends Plugin
 
 
 
+
 	private WorldPoint getAndUpdatePlayersDelayedLoc()
 	{
+
 		if (client.getLocalPlayer().getWorldLocation() == null)
 		{
 			return null;
@@ -658,6 +680,9 @@ public class ExamplePlugin extends Plugin
 	}
 
 
+
+	//may need to write a more robust system to accommodate 2x2 pets
+	//debug by showing exactly what its doing
 	public WorldPoint getPathOutWorldPoint(WorldArea worldArea)
 	{
 
@@ -669,20 +694,86 @@ public class ExamplePlugin extends Plugin
 			{
 				if (worldArea.canTravelInDirection(client,i,0))
 				{
+
 					WorldPoint worldPoint = new WorldPoint(worldArea.getX() + i,worldArea.getY(),client.getPlane());
-					if (!worldPoint.equals(client.getLocalPlayer().getWorldLocation()))
+
+					boolean secondCheck = true;
+					if (petData.getSize() == 2)
+					{
+						WorldArea area = new WorldArea(worldPoint,2,2);
+						secondCheck = area.canTravelInDirection(client,i,0);
+					}
+
+
+					if (!worldPoint.equals(client.getLocalPlayer().getWorldLocation()) && secondCheck)
 					{
 						points.add(worldPoint);
 					}
 
-
 				}
+
+
 				if (worldArea.canTravelInDirection(client,0,i))
 				{
 					WorldPoint worldPoint = new WorldPoint(worldArea.getX(),worldArea.getY() + i,client.getPlane());
-					if (!worldPoint.equals(client.getLocalPlayer().getWorldLocation()))
+
+					boolean secondCheck = true;
+					if (petData.getSize() == 2)
+					{
+						WorldArea area = new WorldArea(worldPoint,2,2);
+					    secondCheck	= area.canTravelInDirection(client,0,i);
+					}
+
+					if (!worldPoint.equals(client.getLocalPlayer().getWorldLocation()) && secondCheck)
 					{
 						points.add(worldPoint);
+					}
+				}
+			}
+		}
+
+		
+		if (!points.isEmpty())
+		{
+			return points.get(getRandomInt(points.size() - 1,0));
+		}
+
+		return null;
+	}
+
+
+	public WorldArea getPathOutWorldPointTest(WorldArea worldArea)
+	{
+
+		ArrayList<WorldArea> points = new ArrayList<>();
+
+		for (int i = -1; i < 2; i++)
+		{
+			if (i != 0)
+			{
+				if (worldArea.canTravelInDirection(client,i,0))
+				{
+					WorldPoint worldPoint = new WorldPoint(worldArea.getX() + i,worldArea.getY(),client.getPlane());
+
+					WorldArea worldArea1 = new WorldArea(worldArea.getX() + i,worldArea.getY() ,2,2,client.getPlane());
+
+					if (!worldPoint.equals(client.getLocalPlayer().getWorldLocation()))
+					{
+						points.add(worldArea1);
+					}
+
+
+				}
+
+				if (worldArea.canTravelInDirection(client,0,i))
+				{
+					WorldPoint worldPoint = new WorldPoint(worldArea.getX(),worldArea.getY() + i,client.getPlane());
+
+					WorldArea worldArea1 = new WorldArea(worldArea.getX(),worldArea.getY() + i,2,2,client.getPlane());
+
+					if (!worldPoint.equals(client.getLocalPlayer().getWorldLocation()))
+					{
+						points.add(worldArea1);
 					}
 				}
 			}
@@ -742,7 +833,7 @@ public class ExamplePlugin extends Plugin
 		double inty = wizard.getWorldLocation().toWorldArea().getY() - pet.getWorldLocation().toWorldArea().getY();
 
 		wizard.getRlObject().setAnimation(client.loadAnimation(813));
-		wizard.spawn(getPathOutWorldPoint(pet.getWorldLocation().toWorldArea()),radToJau(Math.atan2(intx,inty)));
+		wizard.spawn(getPathOutWorldPoint(pet.getWorldLocation().toWorldArea()),radToJau(Math.atan2(intx,inty)),1);
 
 	}
 

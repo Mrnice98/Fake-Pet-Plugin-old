@@ -1,28 +1,23 @@
 package com.example;
 
-import jdk.vm.ci.meta.Local;
 import net.runelite.api.Client;
 import net.runelite.api.Perspective;
 import net.runelite.api.Point;
-import net.runelite.api.coords.LocalPoint;
-import net.runelite.api.coords.WorldArea;
-import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.overlay.*;
 
 import javax.inject.Inject;
 import java.awt.*;
-import java.util.List;
 
 public class OverlayPet extends Overlay
 {
 
-    private ExamplePlugin plugin;
+    private FakePetPlugin plugin;
 
     private Client client;
 
     @Inject
-    public OverlayPet(ExamplePlugin plugin, Client client)
+    public OverlayPet(FakePetPlugin plugin, Client client)
     {
         this.plugin = plugin;
         this.client = client;

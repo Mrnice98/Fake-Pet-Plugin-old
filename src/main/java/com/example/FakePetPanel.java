@@ -24,25 +24,19 @@ import java.util.ArrayList;
 @Singleton
 public class FakePetPanel extends PluginPanel {
 
-    private final ExamplePlugin plugin;
-    private final ExampleConfig config;
 
     @Inject
-    public FakePetPanel(ExamplePlugin plugin,
-                        ExampleConfig config,
-                        JPanel sidePanel,
-                        JPanel titlePanel,
-                        JPanel petButtonsPanel,
-                        ItemManager itemManager,
-                        JPanel petSelectionTitlePanel,
-                        JPanel currentPetTitle,
-                        JPanel currentPetPanel,
-                        JLabel currentPetIcon,
-                        JPanel spacerPanel,
-                        JPanel spacerPanelTop, JPanel favPetButtonsPanel, JPanel spacerPanelFavPets)
+    public FakePetPanel(
+            JPanel sidePanel,
+            JPanel titlePanel,
+            JPanel petButtonsPanel,
+            JPanel petSelectionTitlePanel,
+            JPanel currentPetTitle,
+            JPanel currentPetPanel,
+            JLabel currentPetIcon,
+            JPanel spacerPanel,
+            JPanel spacerPanelTop, JPanel favPetButtonsPanel, JPanel spacerPanelFavPets)
     {
-        this.plugin = plugin;
-        this.config = config;
         this.sidePanel = sidePanel;
         this.titlePanel = titlePanel;
         this.petButtonsPanel = petButtonsPanel;
@@ -56,17 +50,39 @@ public class FakePetPanel extends PluginPanel {
         this.spacerPanelFavPets = spacerPanelFavPets;
     }
 
+    @Inject
+    private FakePetPlugin plugin;
+
+    @Inject
+    private FakePetConfig config;
+
+    @Inject
+    private ItemManager itemManager;
+
+    @Inject
+    private ClientThread clientThread;
+
+    @Inject
+    private ConfigManager configManager;
 
     private final JPanel sidePanel;
-
     private final JPanel titlePanel;
-
     private final JPanel petButtonsPanel;
+    private final JPanel petSelectionTitlePanel;
+    private final JPanel spacerPanelFavPets;
+    private final JPanel favPetButtonsPanel;
+    private final JPanel spacerPanelBottom;
+    private final JPanel spacerPanelTop;
+    private final JPanel currentPetTitle;
+    private final JPanel currentPetPanel;
+    private final JLabel currentPetIcon;
 
-    private static final BufferedImage DROP_DOWN_ICON = ImageUtil.loadImageResource(ExamplePlugin.class, "/dropdown_icon.png");
-    private static final BufferedImage DROP_DOWN_ICON_FLIPPED = ImageUtil.loadImageResource(ExamplePlugin.class, "/dropdown_flipped_icon.png");
-    private static final BufferedImage INVISIBLE_ICON = ImageUtil.loadImageResource(ExamplePlugin.class, "/invisible_icon.png");
-    private static final BufferedImage VISIBLE_ICON = ImageUtil.loadImageResource(ExamplePlugin.class, "/visible_icon.png");
+    private static final BufferedImage DROP_DOWN_ICON = ImageUtil.loadImageResource(FakePetPlugin.class, "/dropdown_icon.png");
+    private static final BufferedImage DROP_DOWN_ICON_FLIPPED = ImageUtil.loadImageResource(FakePetPlugin.class, "/dropdown_flipped_icon.png");
+    private static final BufferedImage INVISIBLE_ICON = ImageUtil.loadImageResource(FakePetPlugin.class, "/invisible_icon.png");
+    private static final BufferedImage VISIBLE_ICON = ImageUtil.loadImageResource(FakePetPlugin.class, "/visible_icon.png");
+
+    private final static String CONFIG_GROUP = "FakePetPlugin";
 
 
     public void sidePanelInitializer()
@@ -99,18 +115,6 @@ public class FakePetPanel extends PluginPanel {
         return titlePanel;
     }
 
-
-
-    @Inject
-    private ItemManager itemManager;
-
-    @Inject
-    private ClientThread clientThread;
-
-    @Inject
-    private ConfigManager configManager;
-
-    private final JPanel petSelectionTitlePanel;
 
     private JPanel buildPetSelectionTitle()
     {
@@ -175,13 +179,13 @@ public class FakePetPanel extends PluginPanel {
 
            if (config.showFavs())
            {
-               configManager.setConfiguration("example","showFavs",false);
+               configManager.setConfiguration(CONFIG_GROUP,"showFavs",false);
                favPetButtonsPanel.setVisible(false);
                spacerPanelFavPets.setVisible(false);
            }
            else
            {
-               configManager.setConfiguration("example","showFavs",true);
+               configManager.setConfiguration(CONFIG_GROUP,"showFavs",true);
                favPetButtonsPanel.setVisible(true);
                spacerPanelFavPets.setVisible(true);
            }
@@ -217,7 +221,7 @@ public class FakePetPanel extends PluginPanel {
 
     private void update() throws InterruptedException
     {
-        configManager.setConfiguration("example","filter",!config.filter());
+        configManager.setConfiguration(CONFIG_GROUP,"filter",!config.filter());
         buildPetButtonsPanel();
         //sleeping the swing thread for 1 client tick to allow the panel to update
         Thread.sleep(20);
@@ -229,8 +233,6 @@ public class FakePetPanel extends PluginPanel {
     }
 
 
-
-    private final JPanel currentPetTitle;
 
 
     private JPanel buildCurrentPetTitle()
@@ -255,11 +257,6 @@ public class FakePetPanel extends PluginPanel {
 
         return currentPetTitle;
     }
-
-
-    private final JPanel currentPetPanel;
-
-    private final JLabel currentPetIcon;
 
     private JPanel buildCurrentPetPanel()
     {
@@ -294,8 +291,7 @@ public class FakePetPanel extends PluginPanel {
     }
 
 
-    private final JPanel spacerPanelBottom;
-    private final JPanel spacerPanelTop;
+
 
     private JPanel buildSpacerPanelTop()
     {
@@ -312,9 +308,6 @@ public class FakePetPanel extends PluginPanel {
 
 
     //add fav pet drop down menu with icon button to trigger
-
-    private final JPanel favPetButtonsPanel;
-
     private JPanel buildFavPetButtonsPanel()
     {
 
@@ -376,7 +369,7 @@ public class FakePetPanel extends PluginPanel {
 
         String s = config.favorites();
         s = s.replaceFirst(petData.getIdentifier(),plugin.petData.getIdentifier());
-        configManager.setConfiguration("example","favorites",s);
+        configManager.setConfiguration(CONFIG_GROUP,"favorites",s);
         buildFavPetButtonsPanel();
 
 //        try
@@ -398,7 +391,6 @@ public class FakePetPanel extends PluginPanel {
 
     }
 
-    private final JPanel spacerPanelFavPets;
 
     private JPanel buildSpacerPanelFavPets()
     {

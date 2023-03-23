@@ -40,9 +40,11 @@ import static net.runelite.api.Perspective.SINE;
 
 @Slf4j
 @PluginDescriptor(
-	name = "Example"
+	name = "Fake Pet Plugin",
+	description = "Spawn any pet in the game",
+	tags = {"pet","fake pet","fake","pvm"}
 )
-public class ExamplePlugin extends Plugin
+public class FakePetPlugin extends Plugin
 {
 	@Inject
 	private Client client;
@@ -51,7 +53,7 @@ public class ExamplePlugin extends Plugin
 	private EventBus eventBus;
 
 	@Inject
-	private ExampleConfig config;
+	private FakePetConfig config;
 
 	@Inject
 	private OverlayManager overlayManager;
@@ -74,6 +76,13 @@ public class ExamplePlugin extends Plugin
 	@Inject
 	private ConfigManager configManager;
 
+	@Inject
+	private ClientToolbar clientToolbar;
+
+	@Inject
+	private ItemManager itemManager;
+
+
 
 	@Override
 	protected void startUp() throws Exception
@@ -94,9 +103,9 @@ public class ExamplePlugin extends Plugin
 	}
 
 	@Provides
-	ExampleConfig provideConfig(ConfigManager configManager)
+	FakePetConfig provideConfig(ConfigManager configManager)
 	{
-		return configManager.getConfig(ExampleConfig.class);
+		return configManager.getConfig(FakePetConfig.class);
 	}
 
 	private int lastActorOrientation;
@@ -124,6 +133,11 @@ public class ExamplePlugin extends Plugin
 
 	public SimplePolygon poly;
 
+	private FakePetPanel panel;
+
+	private NavigationButton navButton;
+
+	private final static String CONFIG_GROUP = "FakePetPlugin";
 
 	@Subscribe
 	public void onConfigChanged(ConfigChanged event)
@@ -133,115 +147,6 @@ public class ExamplePlugin extends Plugin
 			petData = PetData.pets.get(config.pet().getIdentifier());
 			clientThread.invokeLater(()-> updatePet());
 		}
-	}
-
-	//contrast * 5 + 850
-	public Model provideModel()
-	{
-		ModelData[] modelDataArray = new ModelData[petData.getModelIDs().size()];
-		for (int i = 0; i < petData.getModelIDs().size(); i++)
-		{
-			 modelDataArray[i] = client.loadModelData(petData.getModelIDs().get(i));
-		}
-
-		ModelData modelData = createModel(client,modelDataArray);
-
-		if (petData.getScale() != -1)
-		{
-			modelData.cloneVertices();
-			modelData.scale(petData.getScale(),petData.getScale(),petData.getScale());
-		}
-
-
-		//cut list in half fist half color to find, second half color to replace
-		if (petData.getRecolorIDs() !=  null)
-		{
-			modelData.cloneColors();
-			int mid = (petData.getRecolorIDs().size() / 2);
-
-			for (int i = 0; i < mid; i++)
-			{
-				modelData.recolor(petData.getRecolorIDs().get(i),petData.getRecolorIDs().get(mid + i));
-			}
-
-		}
-
-
-		int ambient = (petData.getAmbient() != -1 ? petData.getAmbient() : 0);
-		int contrast = (petData.getContrast() != -1 ? petData.getContrast() : 0);
-
-		return modelData.light(ambient + 64, contrast + 850,-30,-50,-30);
-	}
-
-
-
-	@Inject
-	private ClientToolbar clientToolbar;
-
-	private FakePetPanel panel;
-
-	private NavigationButton navButton;
-
-	@Inject
-	private ItemManager itemManager;
-
-
-	private void buildSidePanel()
-	{
-		panel = injector.getInstance(FakePetPanel.class);
-		panel.sidePanelInitializer();
-
-		if (petData == null)
-		{
-			petData = PetData.pets.get(config.pet().getIdentifier());
-		}
-
-		BufferedImage icon = ImageUtil.loadImageResource(getClass(), "/nav_icon.png");
-		navButton = NavigationButton.builder().tooltip("Fake Pet").icon(icon).priority(5).panel(panel).build();
-		clientToolbar.addNavigation(navButton);
-	}
-
-
-
-
-	public void updatePet()
-	{
-		if (petData != null)
-		{
-			configManager.setConfiguration("example","pet",petData);
-
-		}
-
-		if (pet.getRlObject() == null)
-		{
-			pet.init(client);
-		}
-
-		petModel = provideModel();
-		pet.setPoseAnimations(petData.getIdleAnim(),petData.getWalkAnim(),petData.getRunAnim());
-
-		if (client.getGameState() == GameState.LOGGED_IN && pet.isActive())
-		{
-			//set to 0 for 1x1 and != 90 for 2x2
-			if (pet.getLocalLocation().distanceTo(LocalPoint.fromWorld(client,nextTravellingPoint.toWorldPoint())) > 0 && pet.getLocalLocation().distanceTo(LocalPoint.fromWorld(client,nextTravellingPoint.toWorldPoint())) != 90)
-			{
-				pet.setAnimation(pet.animationPoses[1]);
-			}
-			else
-			{
-				pet.setAnimation(pet.animationPoses[0]);
-			}
-
-		}
-
-		pet.setModel(petModel);
-		panel.updateCurrentPetIcon();
-	}
-
-	public void updatePet(PetData buttonPetData)
-	{
-		petData = buttonPetData;
-		updatePet();
 	}
 
 	@Subscribe
@@ -402,24 +307,6 @@ public class ExamplePlugin extends Plugin
 
 	}
 
-	public boolean extraBlockageCheck(WorldPoint worldPoint)
-	{
-		if (petData.getSize() != 2)
-		{
-			return true;
-		}
-
-		WorldArea area = new WorldArea(worldPoint, 1, 1);
-
-		List<WorldArea> worldAreas = new ArrayList<>();
-		client.getPlayers().forEach(p -> worldAreas.add(p.getWorldArea()));
-		client.getNpcs().forEach(npc -> worldAreas.add(npc.getWorldArea()));
-
-		boolean overlappingModel = worldAreas.stream().anyMatch(wa -> wa.intersectsWith(area));
-
-		return !overlappingModel;
-	}
-
 
 	@Subscribe
 	public void onClientTick(ClientTick event)
@@ -530,34 +417,6 @@ public class ExamplePlugin extends Plugin
 	}
 
 
-	private DialogNode provideDialog()
-	{
-		String dataString = petData.getDryestPerson();
-		String name = dataString.substring(dataString.lastIndexOf(">") + 1,dataString.indexOf(":"));
-		String kc = dataString.substring(dataString.indexOf(":")+ 1,dataString.lastIndexOf(":"));
-		String date = dataString.substring(dataString.lastIndexOf(":") + 1);
-		String kcIdentifer = dataString.substring(1,dataString.lastIndexOf(">"));
-
-
-		return DialogNode.builder()
-				.player()
-				.animationId(567)
-				.body("Tell me something to make me feel better")
-				.onContinue
-						(() ->
-								DialogNode.builder()
-										.npc(petData.getNpcId())
-										.title(petData.getName())
-										.body("It took " + name +" "+ kc + " " + kcIdentifer +" but<br>" +
-												"They finally got me on " + date)
-										.animationId(8265)
-										.build()
-
-
-						)
-				.build();
-	}
-
 
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked event)
@@ -621,8 +480,149 @@ public class ExamplePlugin extends Plugin
 
 	}
 
+	private DialogNode provideDialog()
+	{
+		String dataString = petData.getDryestPerson();
+		String name = dataString.substring(dataString.lastIndexOf(">") + 1,dataString.indexOf(":"));
+		String kc = dataString.substring(dataString.indexOf(":")+ 1,dataString.lastIndexOf(":"));
+		String date = dataString.substring(dataString.lastIndexOf(":") + 1);
+		String kcIdentifer = dataString.substring(1,dataString.lastIndexOf(">"));
 
 
+		return DialogNode.builder()
+				.player()
+				.animationId(567)
+				.body("Tell me something to make me feel better")
+				.onContinue
+						(() ->
+								DialogNode.builder()
+										.npc(petData.getNpcId())
+										.title(petData.getName())
+										.body("It took " + name +" "+ kc + " " + kcIdentifer +" but<br>" +
+												"They finally got me on " + date)
+										.animationId(8265)
+										.build()
+
+
+						)
+				.build();
+	}
+
+
+
+	//contrast * 5 + 850
+	public Model provideModel()
+	{
+		ModelData[] modelDataArray = new ModelData[petData.getModelIDs().size()];
+		for (int i = 0; i < petData.getModelIDs().size(); i++)
+		{
+			modelDataArray[i] = client.loadModelData(petData.getModelIDs().get(i));
+		}
+
+		ModelData modelData = createModel(client,modelDataArray);
+
+		if (petData.getScale() != -1)
+		{
+			modelData.cloneVertices();
+			modelData.scale(petData.getScale(),petData.getScale(),petData.getScale());
+		}
+
+
+		//cut list in half fist half color to find, second half color to replace
+		if (petData.getRecolorIDs() !=  null)
+		{
+			modelData.cloneColors();
+			int mid = (petData.getRecolorIDs().size() / 2);
+
+			for (int i = 0; i < mid; i++)
+			{
+				modelData.recolor(petData.getRecolorIDs().get(i),petData.getRecolorIDs().get(mid + i));
+			}
+
+		}
+
+
+		int ambient = (petData.getAmbient() != -1 ? petData.getAmbient() : 0);
+		int contrast = (petData.getContrast() != -1 ? petData.getContrast() : 0);
+
+		return modelData.light(ambient + 64, contrast + 850,-30,-50,-30);
+	}
+
+
+	private void buildSidePanel()
+	{
+		panel = injector.getInstance(FakePetPanel.class);
+		panel.sidePanelInitializer();
+
+		if (petData == null)
+		{
+			petData = PetData.pets.get(config.pet().getIdentifier());
+		}
+
+		BufferedImage icon = ImageUtil.loadImageResource(getClass(), "/nav_icon.png");
+		navButton = NavigationButton.builder().tooltip("Fake Pet").icon(icon).priority(5).panel(panel).build();
+		clientToolbar.addNavigation(navButton);
+	}
+
+
+
+
+	public void updatePet()
+	{
+		if (petData != null)
+		{
+			configManager.setConfiguration(CONFIG_GROUP,"pet",petData);
+		}
+
+		if (pet.getRlObject() == null)
+		{
+			pet.init(client);
+		}
+
+		petModel = provideModel();
+		pet.setPoseAnimations(petData.getIdleAnim(),petData.getWalkAnim(),petData.getRunAnim());
+
+		if (client.getGameState() == GameState.LOGGED_IN && pet.isActive())
+		{
+			//set to 0 for 1x1 and != 90 for 2x2
+			if (pet.getLocalLocation().distanceTo(LocalPoint.fromWorld(client,nextTravellingPoint.toWorldPoint())) > 0 && pet.getLocalLocation().distanceTo(LocalPoint.fromWorld(client,nextTravellingPoint.toWorldPoint())) != 90)
+			{
+				pet.setAnimation(pet.animationPoses[1]);
+			}
+			else
+			{
+				pet.setAnimation(pet.animationPoses[0]);
+			}
+
+		}
+
+		pet.setModel(petModel);
+		panel.updateCurrentPetIcon();
+	}
+
+	public void updatePet(PetData buttonPetData)
+	{
+		petData = buttonPetData;
+		updatePet();
+	}
+
+	public boolean extraBlockageCheck(WorldPoint worldPoint)
+	{
+		if (petData.getSize() != 2)
+		{
+			return true;
+		}
+
+		WorldArea area = new WorldArea(worldPoint, 1, 1);
+
+		List<WorldArea> worldAreas = new ArrayList<>();
+		client.getPlayers().forEach(p -> worldAreas.add(p.getWorldArea()));
+		client.getNpcs().forEach(npc -> worldAreas.add(npc.getWorldArea()));
+
+		boolean overlappingModel = worldAreas.stream().anyMatch(wa -> wa.intersectsWith(area));
+
+		return !overlappingModel;
+	}
 
 
 	private void spawnPetInHouse()
@@ -689,10 +689,6 @@ public class ExamplePlugin extends Plugin
 		nextTravellingPoint = pet.getWorldLocation().toWorldArea();
 	}
 
-
-
-
-
 	private WorldPoint getAndUpdatePlayersDelayedLoc()
 	{
 
@@ -724,17 +720,12 @@ public class ExamplePlugin extends Plugin
 		return worldPoint;
 	}
 
-
-
 	private int getRandomInt(int max, int min)
 	{
 		return min + (int)(Math.random() * ((max - min) + 1));
 	}
 
 
-
-	//may need to write a more robust system to accommodate 2x2 pets
-	//debug by showing exactly what its doing
 	public WorldPoint getPathOutWorldPoint(WorldArea worldArea)
 	{
 

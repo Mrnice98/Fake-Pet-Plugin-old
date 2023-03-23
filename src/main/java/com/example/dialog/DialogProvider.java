@@ -2,7 +2,7 @@ package com.example.dialog;
 
 import javax.inject.Inject;
 
-import com.example.ExamplePlugin;
+import com.example.FakePetPlugin;
 import com.google.common.util.concurrent.Runnables;
 import net.runelite.api.Client;
 import net.runelite.api.NpcID;
@@ -24,7 +24,7 @@ public class DialogProvider
 	private Client client;
 
 	@Inject
-	private ExamplePlugin plugin;
+	private FakePetPlugin plugin;
 
 	@Inject
 	private ChatboxPanelManager chatboxPanelManager;

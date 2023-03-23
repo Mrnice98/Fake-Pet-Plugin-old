@@ -1,16 +1,11 @@
 package com.example;
 
-import com.google.common.collect.Lists;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-@ConfigGroup("example")
-public interface ExampleConfig extends Config
+@ConfigGroup("FakePetPlugin")
+public interface FakePetConfig extends Config
 {
 	@ConfigItem(
 		keyName = "pet",

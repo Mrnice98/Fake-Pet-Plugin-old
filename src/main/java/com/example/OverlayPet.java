@@ -51,6 +51,7 @@ public class OverlayPet extends Overlay
 
 
             graphics.draw(Perspective.getCanvasTileAreaPoly(client,plugin.pet.getLocalLocation(),plugin.petData.getSize()));
+            //graphics.draw(Perspective.getCanvasTileAreaPoly(client,plugin.pet.targetPosition,plugin.petData.getSize()));
 
 
 

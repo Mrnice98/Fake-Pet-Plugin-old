@@ -138,9 +138,6 @@ public class ObjectModel
 	public void moveTo(WorldPoint worldPosition, int jauOrientation, int size)
 	{
 
-
-
-
 		if (!rlObject.isActive())
 		{
 			spawn(worldPosition, jauOrientation, size);
@@ -192,8 +189,6 @@ public class ObjectModel
 
 	}
 
-
-
 	// onClientTick() updates the per-frame state needed for rendering actor movement
 	public boolean onClientTick(ClientTick clientTick)
 	{
@@ -218,10 +213,6 @@ public class ObjectModel
 				}
 
 				//apply animation if move-speed / distance has changed
-
-
-
-
 				if (lastDistance != targetQueue[cTargetIndex].currentDistance)
 				{
 					int distance = targetQueue[cTargetIndex].currentDistance;
@@ -247,7 +238,7 @@ public class ObjectModel
 				if (dx != 0 || dy != 0)
 				{
 
-					int speed = 4;
+					int speed = lastDistance < 2 ? 4 : 8;
 
 					if (speed > 0)
 					{

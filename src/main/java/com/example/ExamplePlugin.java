@@ -3,12 +3,7 @@ package com.example;
 import com.example.dialog.DialogNode;
 import com.example.dialog.DialogProvider;
 import com.example.dialog.FakeDialogManager;
-import com.google.common.util.concurrent.Runnables;
 import com.google.inject.Provides;
-import javax.inject.Inject;
-import javax.swing.*;
-import javax.swing.plaf.basic.BasicInternalFrameTitlePane;
-
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.coords.LocalPoint;
@@ -17,6 +12,7 @@ import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.*;
 import net.runelite.api.geometry.SimplePolygon;
 import net.runelite.api.model.Jarvis;
+import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
@@ -31,11 +27,11 @@ import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ImageUtil;
 
+import javax.inject.Inject;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.*;
 import java.util.List;
-import java.util.function.Predicate;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.example.ObjectModel.radToJau;
@@ -74,6 +70,10 @@ public class ExamplePlugin extends Plugin
 
 	@Inject
 	private ClientThread clientThread;
+
+	@Inject
+	private ConfigManager configManager;
+
 
 	@Override
 	protected void startUp() throws Exception
@@ -125,10 +125,6 @@ public class ExamplePlugin extends Plugin
 	public SimplePolygon poly;
 
 
-
-
-
-	//fix this
 	@Subscribe
 	public void onConfigChanged(ConfigChanged event)
 	{
@@ -137,9 +133,6 @@ public class ExamplePlugin extends Plugin
 			petData = PetData.pets.get(config.pet().getIdentifier());
 			clientThread.invokeLater(()-> updatePet());
 		}
-
-
-
 	}
 
 	//contrast * 5 + 850
@@ -269,7 +262,7 @@ public class ExamplePlugin extends Plugin
 			pet.despawn();
 		}
 
-		if (gameStateChanged.getGameState() == GameState.LOGGED_IN && petFollowing && client.getVarbitValue(6719) == 0)
+		if ((gameStateChanged.getGameState() == GameState.LOGGED_IN && petFollowing && client.getVarbitValue(6719) == 0) || gameStateChanged.getGameState() == GameState.HOPPING && petFollowing)
 		{
 
 			WorldPoint wp = client.getLocalPlayer().getWorldLocation();
@@ -291,21 +284,6 @@ public class ExamplePlugin extends Plugin
 			}
 
 			nextTravellingPoint = pet.getWorldLocation().toWorldArea();
-
-		}
-
-
-	}
-
-
-
-	@Subscribe
-	public void onScriptPostFired(ScriptPostFired event)
-	{
-
-		if (event.getScriptId() == ScriptID.CHAT_SEND)
-		{
-
 		}
 
 	}
@@ -314,7 +292,7 @@ public class ExamplePlugin extends Plugin
 
 
 
-	//add thing to handle hopping, when you hop your pet teles too you
+
 
 	public PetData petData;
 
@@ -348,17 +326,29 @@ public class ExamplePlugin extends Plugin
 
 	}
 
+
 	@Subscribe
 	public void onGameTick(GameTick event)
 	{
+
+		//System.out.println(client.getNpcs().stream().filter(npc -> npc.getName().equals("Abyssal orphan")).collect(Collectors.toList()).get(0).getWorldLocation().distanceTo(client.getLocalPlayer().getWorldLocation()));
+//		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+//		StringSelection selection = new StringSelection("hi");
+//		clipboard.setContents(selection,selection);
+
+		Map<String,Integer> chatheadNameAndID = new HashMap<>();
+
+		if (client.getWidget(WidgetInfo.DIALOG_NPC_NAME) != null && client.getWidget(WidgetInfo.DIALOG_NPC_HEAD_MODEL) != null)
+		{
+			chatheadNameAndID.put(client.getWidget(WidgetInfo.DIALOG_NPC_NAME).getText(),client.getWidget(WidgetInfo.DIALOG_NPC_HEAD_MODEL).getAnimationId());
+		}
 
 		if (cutScene)
 		{
 			updateWizardActions();
 		}
 
-		WorldPoint playerDelayedLoc;
-		playerDelayedLoc = getAndUpdatePlayersDelayedLoc();
+		WorldPoint playerDelayedLoc = getAndUpdatePlayersDelayedLoc();
 
 		spawnPetInHouse();
 
@@ -384,12 +374,14 @@ public class ExamplePlugin extends Plugin
 
 		WorldArea worldArea = new WorldArea(playerDelayedLoc,1,1);
 
+		nextTravellingPoint = petWorldArea.calculateNextTravellingPoint(client,worldArea,true, this::extraBlockageCheck);
 
-		nextTravellingPoint = petWorldArea.calculateNextTravellingPoint(client,worldArea,true);
+		//allow pets to run / need to update so it wont start walking when it gets close on arrival to the player
+		if (petData == PetData.NEXLING && nextTravellingPoint != null)
+		{
+			nextTravellingPoint = nextTravellingPoint.calculateNextTravellingPoint(client,worldArea,true, this::extraBlockageCheck);
+		}
 
-		//need to adjust the 100 to account for the 2x2 pets
-		//need to get a way to add actors / players as blockers
-		//&& client.getLocalPlayer().getLocalLocation().distanceTo(pet.getLocalLocation()) < 100
 		if (nextTravellingPoint == null)
 		{
 			nextTravellingPoint = new WorldArea(getPathOutWorldPoint(petWorldArea),petData.getSize(),petData.getSize());
@@ -400,7 +392,32 @@ public class ExamplePlugin extends Plugin
 			pet.moveTo(nextTravellingPoint.toWorldPoint(), radToJau(Math.atan2(intx,inty)),petData.getSize());
 		}
 
+		if (pet.getWorldLocation().distanceTo(client.getLocalPlayer().getWorldLocation()) > 16 && petFollowing)
+		{
+			callPet(null);
+		}
 
+
+
+
+	}
+
+	public boolean extraBlockageCheck(WorldPoint worldPoint)
+	{
+		if (petData.getSize() != 2)
+		{
+			return true;
+		}
+
+		WorldArea area = new WorldArea(worldPoint, 1, 1);
+
+		List<WorldArea> worldAreas = new ArrayList<>();
+		client.getPlayers().forEach(p -> worldAreas.add(p.getWorldArea()));
+		client.getNpcs().forEach(npc -> worldAreas.add(npc.getWorldArea()));
+
+		boolean overlappingModel = worldAreas.stream().anyMatch(wa -> wa.intersectsWith(area));
+
+		return !overlappingModel;
 	}
 
 
@@ -415,6 +432,7 @@ public class ExamplePlugin extends Plugin
 			wizard.rotateObject(intx,inty);
 		}
 
+
 		if (pet.getRlObject() != null && pet.animationPoses != null)
 		{
 
@@ -427,11 +445,11 @@ public class ExamplePlugin extends Plugin
 
 			if (pet.animationPoses[0].getId() == pet.getRlObject().getAnimation().getId() && overlappingModel)
 			{
-				pet.setModel(client.loadModel(0));
+				//pet.setModel(client.loadModel(0));
 			}
 			else if (!overlappingModel)
 			{
-				pet.setModel(petModel);
+				//pet.setModel(petModel);
 			}
 
 			LocalPoint lp = pet.getLocalLocation();
@@ -439,18 +457,22 @@ public class ExamplePlugin extends Plugin
 
 			poly = calculateAABB(client, pet.getRlObject().getModel(), pet.getOrientation(), pet.getLocalLocation().getX(), pet.getLocalLocation().getY(),client.getPlane(), zOff);
 
+
 			if (!cutScene)
 			{
 
 				pet.onClientTick(event);
+
 				//for 2x2 set drawFontTilesFirst only when they are moveing / test vs walls in house and rimmy
 				if (petData.getSize() == 2 && pet.getRlObject().getAnimation() != pet.animationPoses[0])
 				{
 					pet.getRlObject().setDrawFrontTilesFirst(true);
+					pet.getRlObject().setRadius(120);
 				}
 				else
 				{
 					pet.getRlObject().setDrawFrontTilesFirst(false);
+					pet.getRlObject().setRadius(60);
 				}
 
 
@@ -507,20 +529,13 @@ public class ExamplePlugin extends Plugin
 
 	}
 
-	@Subscribe
-	public void onMenuEntryAdded(MenuEntryAdded event)
-	{
-
-
-	}
-
 
 	private DialogNode provideDialog()
 	{
 		String dataString = petData.getDryestPerson();
-		String name = dataString.substring(dataString.lastIndexOf(">") + 1,dataString.indexOf(":")).replaceAll(":","").replaceAll(" ","");
-		String kc = dataString.substring(dataString.indexOf(":"),dataString.lastIndexOf(":")).replaceAll(":","").replaceAll(" ","");
-		String date = dataString.substring(dataString.lastIndexOf(":")).replaceAll(":","");
+		String name = dataString.substring(dataString.lastIndexOf(">") + 1,dataString.indexOf(":"));
+		String kc = dataString.substring(dataString.indexOf(":")+ 1,dataString.lastIndexOf(":"));
+		String date = dataString.substring(dataString.lastIndexOf(":") + 1);
 		String kcIdentifer = dataString.substring(1,dataString.lastIndexOf(">"));
 
 
@@ -531,11 +546,11 @@ public class ExamplePlugin extends Plugin
 				.onContinue
 						(() ->
 								DialogNode.builder()
-										.npc(NpcID.CORPOREAL_CRITTER_8010)
+										.npc(petData.getNpcId())
 										.title(petData.getName())
-										.body("It took " + name +" "+ kc + " " + kcIdentifer +"<br>" +
-												"They finally got me on" + date)
-										.animationId(610)
+										.body("It took " + name +" "+ kc + " " + kcIdentifer +" but<br>" +
+												"They finally got me on " + date)
+										.animationId(8265)
 										.build()
 
 
@@ -547,7 +562,6 @@ public class ExamplePlugin extends Plugin
 	@Subscribe
 	public void onMenuOptionClicked(MenuOptionClicked event)
 	{
-
 
 
 		if (petData == null)
@@ -629,8 +643,7 @@ public class ExamplePlugin extends Plugin
 
 	}
 
-	@Inject
-	ConfigManager configManager;
+
 
 	private void callPet(ChatMessage event)
 	{
@@ -643,10 +656,6 @@ public class ExamplePlugin extends Plugin
 			pet.init(client);
 			pet.setPoseAnimations(petData.getIdleAnim(),petData.getWalkAnim(),petData.getRunAnim());
 			pet.setModel(petModel);
-
-//				actor.getRlObject().setDrawFrontTilesFirst(true);
-//				actor.getRlObject().setRadius(1);
-
 		}
 
 		WorldPoint wp = client.getLocalPlayer().getWorldLocation();
@@ -654,10 +663,10 @@ public class ExamplePlugin extends Plugin
 
 		boolean petHasLOS = wp.toWorldArea().hasLineOfSightTo(client,aWP);
 
-		if (wp.toWorldArea().distanceTo(aWP.toWorldArea()) < 6 && petHasLOS && pet.isActive())
+		if (event != null && wp.toWorldArea().distanceTo(aWP.toWorldArea()) < 6 && petHasLOS && pet.isActive())
 		{
 			event.getMessageNode().setValue("Your follower is already close enough.");
-			//return;
+			return;
 		}
 		else if (pet.isActive())
 		{
@@ -668,7 +677,10 @@ public class ExamplePlugin extends Plugin
 		double intx = aWP.toWorldArea().getX() - wp.toWorldArea().getX();
 		double inty = aWP.toWorldArea().getY() - wp.toWorldArea().getY();
 
-		event.getMessageNode().setValue("");
+		if (event != null)
+		{
+			event.getMessageNode().setValue("");
+		}
 
 		petFollowing = true;
 
@@ -741,7 +753,7 @@ public class ExamplePlugin extends Plugin
 					if (petData.getSize() == 2)
 					{
 						WorldArea area = new WorldArea(worldPoint,2,2);
-						secondCheck = area.canTravelInDirection(client,i,0);
+						secondCheck = area.canTravelInDirection(client,i,0) ;
 					}
 
 
@@ -780,55 +792,6 @@ public class ExamplePlugin extends Plugin
 
 		return null;
 	}
-
-
-	public WorldArea getPathOutWorldPointTest(WorldArea worldArea)
-	{
-
-		ArrayList<WorldArea> points = new ArrayList<>();
-
-		for (int i = -1; i < 2; i++)
-		{
-			if (i != 0)
-			{
-				if (worldArea.canTravelInDirection(client,i,0))
-				{
-					WorldPoint worldPoint = new WorldPoint(worldArea.getX() + i,worldArea.getY(),client.getPlane());
-
-					WorldArea worldArea1 = new WorldArea(worldArea.getX() + i,worldArea.getY() ,2,2,client.getPlane());
-
-					if (!worldPoint.equals(client.getLocalPlayer().getWorldLocation()))
-					{
-						points.add(worldArea1);
-					}
-
-
-				}
-
-				if (worldArea.canTravelInDirection(client,0,i))
-				{
-					WorldPoint worldPoint = new WorldPoint(worldArea.getX(),worldArea.getY() + i,client.getPlane());
-
-					WorldArea worldArea1 = new WorldArea(worldArea.getX(),worldArea.getY() + i,2,2,client.getPlane());
-
-					if (!worldPoint.equals(client.getLocalPlayer().getWorldLocation()))
-					{
-						points.add(worldArea1);
-					}
-				}
-			}
-		}
-
-
-		if (!points.isEmpty())
-		{
-			return points.get(getRandomInt(points.size() - 1,0));
-		}
-
-		return null;
-	}
-
-
 
 
 	public void runCutScene()

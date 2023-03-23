@@ -1,6 +1,5 @@
 package com.example;
 
-import com.google.common.collect.Lists;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import net.runelite.client.callback.ClientThread;
@@ -20,8 +19,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.MatteBorder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
-import java.util.List;
+import java.util.ArrayList;
 
 @Singleton
 public class FakePetPanel extends PluginPanel {
@@ -41,7 +39,7 @@ public class FakePetPanel extends PluginPanel {
                         JPanel currentPetPanel,
                         JLabel currentPetIcon,
                         JPanel spacerPanel,
-                        JPanel spacerPanelTop)
+                        JPanel spacerPanelTop, JPanel favPetButtonsPanel, JPanel spacerPanelFavPets)
     {
         this.plugin = plugin;
         this.config = config;
@@ -54,6 +52,8 @@ public class FakePetPanel extends PluginPanel {
         this.currentPetIcon = currentPetIcon;
         this.spacerPanelBottom = spacerPanel;
         this.spacerPanelTop = spacerPanelTop;
+        this.favPetButtonsPanel = favPetButtonsPanel;
+        this.spacerPanelFavPets = spacerPanelFavPets;
     }
 
 
@@ -62,6 +62,11 @@ public class FakePetPanel extends PluginPanel {
     private final JPanel titlePanel;
 
     private final JPanel petButtonsPanel;
+
+    private static final BufferedImage DROP_DOWN_ICON = ImageUtil.loadImageResource(ExamplePlugin.class, "/dropdown_icon.png");
+    private static final BufferedImage DROP_DOWN_ICON_FLIPPED = ImageUtil.loadImageResource(ExamplePlugin.class, "/dropdown_flipped_icon.png");
+    private static final BufferedImage INVISIBLE_ICON = ImageUtil.loadImageResource(ExamplePlugin.class, "/invisible_icon.png");
+    private static final BufferedImage VISIBLE_ICON = ImageUtil.loadImageResource(ExamplePlugin.class, "/visible_icon.png");
 
 
     public void sidePanelInitializer()
@@ -74,6 +79,8 @@ public class FakePetPanel extends PluginPanel {
         this.sidePanel.add(this.buildCurrentPetPanel());
         this.sidePanel.add(this.buildSpacerPanelTop());
         this.sidePanel.add(this.buildPetSelectionTitle());
+        this.sidePanel.add(this.buildFavPetButtonsPanel());
+        this.sidePanel.add(this.buildSpacerPanelFavPets());
         this.sidePanel.add(this.buildPetButtonsPanel());
         this.sidePanel.add(this.buildSpacerPanelBottom());
 
@@ -121,11 +128,7 @@ public class FakePetPanel extends PluginPanel {
             plugin.petData = PetData.pets.get(config.pet().getIdentifier());
         }
 
-
-        BufferedImage invisibleIcon = ImageUtil.loadImageResource(ExamplePlugin.class, "/invisible_icon.png");
-        BufferedImage visibleIcon = ImageUtil.loadImageResource(ExamplePlugin.class, "/visible_icon.png");
-
-        BufferedImage bufferedIcon = config.filter() ? visibleIcon : invisibleIcon;
+        BufferedImage bufferedIcon = config.filter() ? VISIBLE_ICON : INVISIBLE_ICON;
         String hoverText = config.filter() ? "Filter Pets" : "Un-Filter Pets";
 
         JButton button = new JButton(new ImageIcon(bufferedIcon));
@@ -135,11 +138,19 @@ public class FakePetPanel extends PluginPanel {
         button.setSize(dimension);
         button.setMaximumSize(dimension);
         button.setToolTipText(hoverText);
+        SwingUtil.removeButtonDecorations(button);
+
         button.addActionListener(e-> {
 
             try
             {
                 update();
+
+                BufferedImage icon = config.filter() ? VISIBLE_ICON : INVISIBLE_ICON;
+                String text = config.filter() ? "Filter Pets" : "Un-Filter Pets";
+                button.setToolTipText(text);
+                button.setIcon(new ImageIcon(icon));
+                button.setRolloverIcon(new ImageIcon(ImageUtil.luminanceOffset(icon, -80)));
 
             }
             catch (InterruptedException ex)
@@ -150,20 +161,55 @@ public class FakePetPanel extends PluginPanel {
 
         });
 
-        SwingUtil.removeButtonDecorations(button);
+        BufferedImage dropdownIcon = config.showFavs() ? DROP_DOWN_ICON_FLIPPED : DROP_DOWN_ICON;
+        String toolTipText = config.showFavs() ? "Hide Favorites" : "Show Favorites";
 
+        JButton dropDownButton = new JButton(new ImageIcon(dropdownIcon));
+        dropDownButton.setRolloverIcon(new ImageIcon(ImageUtil.luminanceOffset(dropdownIcon, -80)));
+        dropDownButton.setSize(dimension);
+        dropDownButton.setMaximumSize(dimension);
+        dropDownButton.setToolTipText(toolTipText);
+        SwingUtil.removeButtonDecorations(dropDownButton);
+
+        dropDownButton.addActionListener(e-> {
+
+           if (config.showFavs())
+           {
+               configManager.setConfiguration("example","showFavs",false);
+               favPetButtonsPanel.setVisible(false);
+               spacerPanelFavPets.setVisible(false);
+           }
+           else
+           {
+               configManager.setConfiguration("example","showFavs",true);
+               favPetButtonsPanel.setVisible(true);
+               spacerPanelFavPets.setVisible(true);
+           }
+
+            BufferedImage icon = config.showFavs() ? DROP_DOWN_ICON_FLIPPED : DROP_DOWN_ICON;
+            String toolTip = config.showFavs() ? "Hide Favorites" : "Show Favorites";
+            dropDownButton.setIcon(new ImageIcon(icon));
+            dropDownButton.setRolloverIcon(new ImageIcon(ImageUtil.luminanceOffset(icon, -80)));
+            dropDownButton.setToolTipText(toolTip);
+
+        });
+
+        if (!config.showFavs())
+        {
+            favPetButtonsPanel.setVisible(false);
+            spacerPanelFavPets.setVisible(false);
+        }
 
 
         JLabel title = new JLabel("Pet Selector");
         title.setFont(FontManager.getRunescapeBoldFont());
         title.setForeground(Color.LIGHT_GRAY);
 
-        petSelectionTitlePanel.add(Box.createRigidArea(new Dimension(55, 0)),"Left");
+        petSelectionTitlePanel.add(dropDownButton,"Left");
+        petSelectionTitlePanel.add(Box.createRigidArea(new Dimension(15, 0)),"Left");
         petSelectionTitlePanel.add(title,"Center");
         petSelectionTitlePanel.add(Box.createRigidArea(new Dimension(15, 0)),"Right");
         petSelectionTitlePanel.add(button,"Right");
-
-
 
         return petSelectionTitlePanel;
     }
@@ -173,7 +219,6 @@ public class FakePetPanel extends PluginPanel {
     {
         configManager.setConfiguration("example","filter",!config.filter());
         buildPetButtonsPanel();
-        buildPetSelectionTitle();
         //sleeping the swing thread for 1 client tick to allow the panel to update
         Thread.sleep(20);
 
@@ -264,6 +309,103 @@ public class FakePetPanel extends PluginPanel {
         spacerPanelBottom.setBorder(new CompoundBorder(new EmptyBorder(0, 0, 0, 0), new MatteBorder(0, 0, 1, 0, new Color(42, 255, 0, 89))));
         return spacerPanelBottom;
     }
+
+
+    //add fav pet drop down menu with icon button to trigger
+
+    private final JPanel favPetButtonsPanel;
+
+    private JPanel buildFavPetButtonsPanel()
+    {
+
+        favPetButtonsPanel.removeAll();
+
+        favPetButtonsPanel.setBorder(new EmptyBorder(5, 0, 0, 0));
+
+        String favs = config.favorites();
+        ArrayList<PetData> favorites = new ArrayList<>();
+
+
+        while (favs.contains(">"))
+        {
+            String id = favs.substring(0,favs.indexOf(">")).replaceFirst("<","");
+            favs = favs.replaceFirst( "<" + id + ">","");
+
+            favorites.add(PetData.pets.get(id));
+        }
+
+
+        for (PetData petData : favorites)
+        {
+            Icon icon = new ImageIcon(itemManager.getImage(petData.getIconID()));
+
+            JButton button = new JButton(icon);
+            button.setToolTipText(petData.getName());
+            button.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+            button.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createMatteBorder(1, 1, 1, 1, ColorScheme.DARK_GRAY_COLOR),
+                    new EmptyBorder(0, 5, 0, 0)
+            ));
+
+            JMenuItem setCurrentPetAsFav = new JMenuItem("Swap with current pet");
+            setCurrentPetAsFav.addActionListener(e -> updateFavPet(petData));
+
+            JPopupMenu popupMenu = new JPopupMenu();
+            popupMenu.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+            popupMenu.add(setCurrentPetAsFav);
+
+            button.setComponentPopupMenu(popupMenu);
+
+            button.addActionListener(e-> clientThread.invokeLater(()-> plugin.updatePet(petData)));
+            favPetButtonsPanel.add(button);
+        }
+
+        favPetButtonsPanel.setLayout(new GridLayout(1,4,2,2));
+
+        return favPetButtonsPanel;
+    }
+
+    //setup a better revalidate system
+    private void updateFavPet(PetData petData)
+    {
+        if (plugin.petData.getIdentifier().equals(petData.getIdentifier()) || config.favorites().contains(plugin.petData.getIdentifier()))
+        {
+            return;
+        }
+
+        String s = config.favorites();
+        s = s.replaceFirst(petData.getIdentifier(),plugin.petData.getIdentifier());
+        configManager.setConfiguration("example","favorites",s);
+        buildFavPetButtonsPanel();
+
+//        try
+//        {
+//            Thread.sleep(20);
+//        }
+//        catch (InterruptedException e)
+//        {
+//            e.printStackTrace();
+//        }
+
+        SwingUtilities.invokeLater(()->
+        {
+            favPetButtonsPanel.revalidate();
+            favPetButtonsPanel.repaint();
+
+        });
+
+
+    }
+
+    private final JPanel spacerPanelFavPets;
+
+    private JPanel buildSpacerPanelFavPets()
+    {
+        spacerPanelFavPets.setBorder(new CompoundBorder(new EmptyBorder(-5, 0, 0, 0), new MatteBorder(0, 0, 1, 0, new Color(42, 255, 0, 89))));
+        return spacerPanelFavPets;
+    }
+
 
 
     private JPanel buildPetButtonsPanel()

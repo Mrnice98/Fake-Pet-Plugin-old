@@ -10,7 +10,8 @@ public interface FakePetConfig extends Config
 	@ConfigItem(
 		keyName = "pet",
 		name = "Pick Pet",
-		description = "Pick pet"
+		description = "Pick pet",
+		hidden = true
 	)
 	default PetData pet()
 	{
@@ -29,9 +30,9 @@ public interface FakePetConfig extends Config
 	}
 
 	@ConfigItem(
-			keyName = "showFavs",
-			name = "Show Favs",
-			description = "Show Favs",
+			keyName = "showPets",
+			name = "Show Pets",
+			description = "Show Pets",
 			hidden = true
 	)
 	default boolean showFavs()
@@ -48,6 +49,17 @@ public interface FakePetConfig extends Config
 	default String favorites()
 	{
 		return "<Abyssal Orphan><Hellpuppy><Tangleroot><Noon>";
+	}
+
+	@ConfigItem(
+			keyName = "debug",
+			name = "Enable Debug",
+			description = "Enables Debug",
+			hidden = false
+	)
+	default boolean debug()
+	{
+		return false;
 	}
 
 }

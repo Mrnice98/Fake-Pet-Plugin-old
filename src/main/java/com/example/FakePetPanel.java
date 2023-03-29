@@ -166,7 +166,7 @@ public class FakePetPanel extends PluginPanel {
         });
 
         BufferedImage dropdownIcon = config.showFavs() ? DROP_DOWN_ICON_FLIPPED : DROP_DOWN_ICON;
-        String toolTipText = config.showFavs() ? "Hide Favorites" : "Show Favorites";
+        String toolTipText = config.showFavs() ? "Hide Pet list" : "Show Pet list";
 
         JButton dropDownButton = new JButton(new ImageIcon(dropdownIcon));
         dropDownButton.setRolloverIcon(new ImageIcon(ImageUtil.luminanceOffset(dropdownIcon, -80)));
@@ -179,19 +179,19 @@ public class FakePetPanel extends PluginPanel {
 
            if (config.showFavs())
            {
-               configManager.setConfiguration(CONFIG_GROUP,"showFavs",false);
-               favPetButtonsPanel.setVisible(false);
-               spacerPanelFavPets.setVisible(false);
+               configManager.setConfiguration(CONFIG_GROUP,"showPets",false);
+               petButtonsPanel.setVisible(false);
+               spacerPanelBottom.setVisible(false);
            }
            else
            {
-               configManager.setConfiguration(CONFIG_GROUP,"showFavs",true);
-               favPetButtonsPanel.setVisible(true);
-               spacerPanelFavPets.setVisible(true);
+               configManager.setConfiguration(CONFIG_GROUP,"showPets",true);
+               petButtonsPanel.setVisible(true);
+               spacerPanelBottom.setVisible(true);
            }
 
             BufferedImage icon = config.showFavs() ? DROP_DOWN_ICON_FLIPPED : DROP_DOWN_ICON;
-            String toolTip = config.showFavs() ? "Hide Favorites" : "Show Favorites";
+            String toolTip = config.showFavs() ? "Hide Pet list" : "Show Pet list";
             dropDownButton.setIcon(new ImageIcon(icon));
             dropDownButton.setRolloverIcon(new ImageIcon(ImageUtil.luminanceOffset(icon, -80)));
             dropDownButton.setToolTipText(toolTip);
@@ -200,8 +200,8 @@ public class FakePetPanel extends PluginPanel {
 
         if (!config.showFavs())
         {
-            favPetButtonsPanel.setVisible(false);
-            spacerPanelFavPets.setVisible(false);
+            petButtonsPanel.setVisible(false);
+            spacerPanelBottom.setVisible(false);
         }
 
 
@@ -231,8 +231,6 @@ public class FakePetPanel extends PluginPanel {
         petButtonsPanel.repaint();
         petSelectionTitlePanel.repaint();
     }
-
-
 
 
     private JPanel buildCurrentPetTitle()
@@ -272,7 +270,6 @@ public class FakePetPanel extends PluginPanel {
     }
 
 
-
     public void updateCurrentPetIcon()
     {
         if (plugin.petData == null)
@@ -289,8 +286,6 @@ public class FakePetPanel extends PluginPanel {
         icon.onLoaded(resize);
         resize.run();
     }
-
-
 
 
     private JPanel buildSpacerPanelTop()
@@ -359,7 +354,6 @@ public class FakePetPanel extends PluginPanel {
         return favPetButtonsPanel;
     }
 
-    //setup a better revalidate system
     private void updateFavPet(PetData petData)
     {
         if (plugin.petData.getIdentifier().equals(petData.getIdentifier()) || config.favorites().contains(plugin.petData.getIdentifier()))
@@ -372,21 +366,17 @@ public class FakePetPanel extends PluginPanel {
         configManager.setConfiguration(CONFIG_GROUP,"favorites",s);
         buildFavPetButtonsPanel();
 
-//        try
-//        {
-//            Thread.sleep(20);
-//        }
-//        catch (InterruptedException e)
-//        {
-//            e.printStackTrace();
-//        }
-
-        SwingUtilities.invokeLater(()->
+        try
         {
-            favPetButtonsPanel.revalidate();
-            favPetButtonsPanel.repaint();
+            Thread.sleep(20);
+        }
+        catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
 
-        });
+        favPetButtonsPanel.revalidate();
+        favPetButtonsPanel.repaint();
 
 
     }

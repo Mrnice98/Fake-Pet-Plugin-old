@@ -9,11 +9,8 @@ import net.runelite.api.coords.WorldArea;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ClientTick;
 
-import javax.inject.Inject;
-import java.awt.*;
 
-
-public class ObjectModel
+public class PetObjectModel
 {
 	private Client client;
 	private RuneLiteObject rlObject;
@@ -160,11 +157,6 @@ public class ObjectModel
 
 		int prevTargetIndex = (cTargetIndex + targetQueueSize - 1) % MAX_TARGET_QUEUE_SIZE;
 		int newTargetIndex = (cTargetIndex + targetQueueSize) % MAX_TARGET_QUEUE_SIZE;
-
-//		LocalPoint localPosition = LocalPoint.fromWorld(client, worldPosition);
-//		localPosition = new LocalPoint(localPosition.getX() + 64,localPosition.getY() + 64);
-//		worldPosition = WorldPoint.fromLocal(client,localPosition);
-
 
 		if (localPosition == null)
 		{

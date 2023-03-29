@@ -13,10 +13,6 @@ public class DialogProvider
 {
 
 	private static final int PLAYER_TALK_1 = 567;
-
-	private static final String ABYSSAL_ORPHAN_TITLE = "Abyssal Orphan";
-	private static final int ABYSSAL_ORPHAN_ANIMATION = -1; // todo, don't have this pet
-	
 	private static final String LIL_ZIK_TITLE = "Lil' Zik";
 	private static final int LIL_ZIK_ANIMATION = 610;
 

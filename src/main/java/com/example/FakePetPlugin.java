@@ -18,23 +18,29 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
+import net.runelite.client.events.PluginChanged;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.chatbox.ChatboxPanelManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.plugins.PluginManager;
+import net.runelite.client.plugins.config.PluginSearch;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
+import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ImageUtil;
 
 import javax.inject.Inject;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.example.ObjectModel.radToJau;
+import static com.example.PetObjectModel.radToJau;
 import static net.runelite.api.Perspective.COSINE;
 import static net.runelite.api.Perspective.SINE;
 
@@ -59,7 +65,7 @@ public class FakePetPlugin extends Plugin
 	private OverlayManager overlayManager;
 
 	@Inject
-	private OverlayPet overlayPet;
+	private PetOverlay overlayPet;
 
 	@Inject
 	private DialogProvider dialogProvider;
@@ -83,14 +89,12 @@ public class FakePetPlugin extends Plugin
 	private ItemManager itemManager;
 
 
-
 	@Override
 	protected void startUp() throws Exception
 	{
 		buildSidePanel();
 		overlayManager.add(overlayPet);
 		eventBus.register(fakeDialogManager);
-
 	}
 
 	@Override
@@ -118,8 +122,10 @@ public class FakePetPlugin extends Plugin
 	private boolean petEnterHouse;
 	public boolean cutScene = false;
 
-	public ObjectModel pet = new ObjectModel();
-	public ObjectModel wizard = new ObjectModel();
+	public PetObjectModel pet = new PetObjectModel();
+	public PetObjectModel wizard = new PetObjectModel();
+
+	public PetData petData;
 
 	private WorldPoint lastPlayerWP;
 	private WorldPoint lastActorWP;
@@ -194,13 +200,6 @@ public class FakePetPlugin extends Plugin
 	}
 
 
-
-
-
-
-
-	public PetData petData;
-
 	@Subscribe
 	public void onChatMessage(ChatMessage event)
 	{
@@ -232,50 +231,35 @@ public class FakePetPlugin extends Plugin
 	}
 
 
+
+
 	@Subscribe
 	public void onGameTick(GameTick event)
 	{
 
-		//System.out.println(client.getNpcs().stream().filter(npc -> npc.getName().equals("Abyssal orphan")).collect(Collectors.toList()).get(0).getWorldLocation().distanceTo(client.getLocalPlayer().getWorldLocation()));
-//		Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-//		StringSelection selection = new StringSelection("hi");
-//		clipboard.setContents(selection,selection);
-
-		Map<String,Integer> chatheadNameAndID = new HashMap<>();
-
-		if (client.getWidget(WidgetInfo.DIALOG_NPC_NAME) != null && client.getWidget(WidgetInfo.DIALOG_NPC_HEAD_MODEL) != null)
-		{
-			chatheadNameAndID.put(client.getWidget(WidgetInfo.DIALOG_NPC_NAME).getText(),client.getWidget(WidgetInfo.DIALOG_NPC_HEAD_MODEL).getAnimationId());
-		}
-
 		if (cutScene)
 		{
-			updateWizardActions();
+			//updateWizardActions();
 		}
 
 		WorldPoint playerDelayedLoc = getAndUpdatePlayersDelayedLoc();
 
 		spawnPetInHouse();
 
-
 		if (pet.getRlObject() == null || !pet.isActive())
 		{
 			return;
 		}
 
-
 		Player player = client.getLocalPlayer();
 		double intx = pet.getLocalLocation().getX() - player.getLocalLocation().getX();
 		double inty = pet.getLocalLocation().getY() - player.getLocalLocation().getY();
-
-
 
 		if (nextTravellingPoint != null)
 		{
 			petWorldArea = nextTravellingPoint;
 			petWorldArea = new WorldArea(nextTravellingPoint.toWorldPoint(),petData.getSize(),petData.getSize());
 		}
-
 
 		WorldArea worldArea = new WorldArea(playerDelayedLoc,1,1);
 
@@ -356,7 +340,7 @@ public class FakePetPlugin extends Plugin
 					pet.getRlObject().setDrawFrontTilesFirst(true);
 					pet.getRlObject().setRadius(120);
 				}
-				else
+				else if (pet.getRlObject().getRadius() == 120)
 				{
 					pet.getRlObject().setDrawFrontTilesFirst(false);
 					pet.getRlObject().setRadius(60);
@@ -459,7 +443,7 @@ public class FakePetPlugin extends Plugin
 
 		if (event.getMenuEntry().getType() == MenuAction.RUNELITE && event.getMenuTarget().contains(petData.getName()) && event.getMenuOption().equals("Talk-to"))
 		{
-			if (pet.isActive() && pet.getWorldLocation().toWorldArea().isInMeleeDistance(client.getLocalPlayer().getWorldArea()))
+			if (pet.isActive() && pet.getWorldArea().isInMeleeDistance(client.getLocalPlayer().getWorldArea()))
 			{
 				dialogOpen = true;
 				fakeDialogManager.open(provideDialog());
@@ -500,7 +484,7 @@ public class FakePetPlugin extends Plugin
 										.title(petData.getName())
 										.body("It took " + name +" "+ kc + " " + kcIdentifer +" but<br>" +
 												"They finally got me on " + date)
-										.animationId(8265)
+										.animationId(petData.getChatHeadAnimID())
 										.build()
 
 
@@ -785,103 +769,103 @@ public class FakePetPlugin extends Plugin
 	}
 
 
-	public void runCutScene()
-	{
-		if (cutScene)
-		{
-			return;
-		}
-
-		cutScene = true;
-		gameTickCutSceneStart = client.getTickCount();
-
-		short clothingColor = JagexColor.rgbToHSL(new Color(102, 93, 44).getRGB(), 0.6d);
-		short blue = JagexColor.rgbToHSL(Color.BLUE.getRGB(), 1.0d);
-
-		ModelData skirt = client.loadModelData(265).cloneColors().recolor((short)25238, clothingColor);
-
-		ModelData shirt = client.loadModelData(292).cloneColors().recolor((short)8741, clothingColor);
-
-		ModelData arms = client.loadModelData(170).cloneColors().recolor((short)8741, clothingColor);
-
-		ModelData cape = client.loadModelData(323).cloneColors()
-				.recolor((short) 926, blue) // Inside
-				.recolor((short) 7700, blue) // Mail cape
-				.recolor((short) 11200, (short)8741); // Trim
-
-		ModelData partyhat = client.loadModelData(187).cloneColors().recolor((short)926, blue);
-
-		ModelData mdf = createModel(client,
-				9103, // face
-				4925, // beard
-				176, // hands
-				181); // feet
-
-		mdf = createModel(client, mdf, skirt, shirt, arms, cape, partyhat);
-		Model model = mdf.light();
-
-		wizard.init(client);
-		wizard.setModel(model);
-
-		double intx = wizard.getWorldLocation().toWorldArea().getX() - pet.getWorldLocation().toWorldArea().getX();
-		double inty = wizard.getWorldLocation().toWorldArea().getY() - pet.getWorldLocation().toWorldArea().getY();
-
-		wizard.getRlObject().setAnimation(client.loadAnimation(813));
-		wizard.spawn(getPathOutWorldPoint(pet.getWorldLocation().toWorldArea()),radToJau(Math.atan2(intx,inty)),1);
-
-	}
-
-	public void updateWizardActions()
-	{
-		switch (client.getTickCount() - gameTickCutSceneStart)
-		{
-			case 1:
-				message = "Hey, How'd you get out of your cage?";
-				wizard.getRlObject().setAnimation(client.loadAnimation(857));
-				client.addChatMessage(ChatMessageType.GAMEMESSAGE,"", "MrNice98: <col=0000ff>"+message+"</col>","");
-				break;
-
-			case 7:
-				message = "";
-				break;
-
-			case 10:
-				message = "Don't you know your Clippers pet";
-				wizard.getRlObject().setAnimation(client.loadAnimation(813));
-				client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","MrNice98: <col=0000ff>"+message+"</col>","");
-				break;
-
-			case 16:
-				message = "";
-				break;
-
-			case 20:
-				message = "Sorry, I need bring him back to Clipper";
-				client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","MrNice98: <col=0000ff>"+message+"</col>","");//<col=ef1020>58:40</col>58:40</col>
-				break;
-
-			case 26:
-				message = "";
-				break;
-
-			case 30:
-				message = "Best I can do is a dupe Lil' Grumble";
-				client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","MrNice98: <col=0000ff>"+message+"</col>","");
-				break;
-
-			case 35:
-				message = "Toodaloo!";
-				wizard.getRlObject().setAnimation(client.loadAnimation(714));
-				client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","MrNice98: <col=0000ff>"+message+"</col>","");
-				break;
-
-			case 37:
-				wizard.despawn();
-				pet.despawn();
-				petFollowing = false;
-				break;
-		}
-	}
+//	public void runCutScene()
+//	{
+//		if (cutScene)
+//		{
+//			return;
+//		}
+//
+//		cutScene = true;
+//		gameTickCutSceneStart = client.getTickCount();
+//
+//		short clothingColor = JagexColor.rgbToHSL(new Color(102, 93, 44).getRGB(), 0.6d);
+//		short blue = JagexColor.rgbToHSL(Color.BLUE.getRGB(), 1.0d);
+//
+//		ModelData skirt = client.loadModelData(265).cloneColors().recolor((short)25238, clothingColor);
+//
+//		ModelData shirt = client.loadModelData(292).cloneColors().recolor((short)8741, clothingColor);
+//
+//		ModelData arms = client.loadModelData(170).cloneColors().recolor((short)8741, clothingColor);
+//
+//		ModelData cape = client.loadModelData(323).cloneColors()
+//				.recolor((short) 926, blue) // Inside
+//				.recolor((short) 7700, blue) // Mail cape
+//				.recolor((short) 11200, (short)8741); // Trim
+//
+//		ModelData partyhat = client.loadModelData(187).cloneColors().recolor((short)926, blue);
+//
+//		ModelData mdf = createModel(client,
+//				9103, // face
+//				4925, // beard
+//				176, // hands
+//				181); // feet
+//
+//		mdf = createModel(client, mdf, skirt, shirt, arms, cape, partyhat);
+//		Model model = mdf.light();
+//
+//		wizard.init(client);
+//		wizard.setModel(model);
+//
+//		double intx = wizard.getWorldLocation().toWorldArea().getX() - pet.getWorldLocation().toWorldArea().getX();
+//		double inty = wizard.getWorldLocation().toWorldArea().getY() - pet.getWorldLocation().toWorldArea().getY();
+//
+//		wizard.getRlObject().setAnimation(client.loadAnimation(813));
+//		wizard.spawn(getPathOutWorldPoint(pet.getWorldLocation().toWorldArea()),radToJau(Math.atan2(intx,inty)),1);
+//
+//	}
+//
+//	public void updateWizardActions()
+//	{
+//		switch (client.getTickCount() - gameTickCutSceneStart)
+//		{
+//			case 1:
+//				message = "Hey, How'd you get out of your cage?";
+//				wizard.getRlObject().setAnimation(client.loadAnimation(857));
+//				client.addChatMessage(ChatMessageType.GAMEMESSAGE,"", "MrNice98: <col=0000ff>"+message+"</col>","");
+//				break;
+//
+//			case 7:
+//				message = "";
+//				break;
+//
+//			case 10:
+//				message = "Don't you know your Clippers pet";
+//				wizard.getRlObject().setAnimation(client.loadAnimation(813));
+//				client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","MrNice98: <col=0000ff>"+message+"</col>","");
+//				break;
+//
+//			case 16:
+//				message = "";
+//				break;
+//
+//			case 20:
+//				message = "Sorry, I need bring him back to Clipper";
+//				client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","MrNice98: <col=0000ff>"+message+"</col>","");//<col=ef1020>58:40</col>58:40</col>
+//				break;
+//
+//			case 26:
+//				message = "";
+//				break;
+//
+//			case 30:
+//				message = "Best I can do is a dupe Lil' Grumble";
+//				client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","MrNice98: <col=0000ff>"+message+"</col>","");
+//				break;
+//
+//			case 35:
+//				message = "Toodaloo!";
+//				wizard.getRlObject().setAnimation(client.loadAnimation(714));
+//				client.addChatMessage(ChatMessageType.GAMEMESSAGE,"","MrNice98: <col=0000ff>"+message+"</col>","");
+//				break;
+//
+//			case 37:
+//				wizard.despawn();
+//				pet.despawn();
+//				petFollowing = false;
+//				break;
+//		}
+//	}
 
 
 	private static ModelData createModel(Client client, ModelData... data)

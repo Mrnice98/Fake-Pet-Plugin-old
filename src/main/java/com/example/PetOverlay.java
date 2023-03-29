@@ -9,29 +9,31 @@ import net.runelite.client.ui.overlay.*;
 import javax.inject.Inject;
 import java.awt.*;
 
-public class OverlayPet extends Overlay
+public class PetOverlay extends Overlay
 {
 
     private FakePetPlugin plugin;
 
     private Client client;
 
+    private FakePetConfig config;
+
     @Inject
-    public OverlayPet(FakePetPlugin plugin, Client client)
+    public PetOverlay(FakePetPlugin plugin, Client client, FakePetConfig config)
     {
         this.plugin = plugin;
         this.client = client;
+        this.config = config;
         setLayer(OverlayLayer.ABOVE_SCENE);
         setPosition(OverlayPosition.DYNAMIC);
     }
 
-    ObjectModel objectModel;
 
     @Override
     public Dimension render(Graphics2D graphics)
     {
 
-        if (plugin.pet.getRlObject() != null && plugin.pet.isActive() && plugin.nextTravellingPoint != null && plugin.poly != null)
+        if (plugin.pet.getRlObject() != null && plugin.pet.isActive() && plugin.nextTravellingPoint != null && plugin.poly != null && config.debug())
         {
             if (plugin.poly.contains(client.getMouseCanvasPosition().getX(),client.getMouseCanvasPosition().getY()))
             {
@@ -44,12 +46,7 @@ public class OverlayPet extends Overlay
 
             graphics.draw(plugin.poly);
 
-
             graphics.draw(Perspective.getCanvasTileAreaPoly(client,plugin.pet.getLocalLocation(),plugin.petData.getSize()));
-            //graphics.draw(Perspective.getCanvasTileAreaPoly(client,plugin.pet.targetPosition,plugin.petData.getSize()));
-
-
-
 
             graphics.setFont(FontManager.getRunescapeBoldFont());
 
@@ -59,10 +56,7 @@ public class OverlayPet extends Overlay
                 OverlayUtil.renderTextLocation(graphics,canvasPoint2,plugin.message,Color.YELLOW);
             }
 
-
-
         }
-
 
         return null;
     }

@@ -12,32 +12,26 @@ import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.*;
 import net.runelite.api.geometry.SimplePolygon;
 import net.runelite.api.model.Jarvis;
-import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
-import net.runelite.client.events.PluginChanged;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.game.chatbox.ChatboxPanelManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.plugins.PluginManager;
-import net.runelite.client.plugins.config.PluginSearch;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
-import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ImageUtil;
 
 import javax.inject.Inject;
-import java.awt.*;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.*;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.example.PetObjectModel.radToJau;
@@ -48,7 +42,7 @@ import static net.runelite.api.Perspective.SINE;
 @PluginDescriptor(
 	name = "Fake Pet Plugin",
 	description = "Spawn any pet in the game",
-	tags = {"pet","fake pet","fake","pvm"}
+	tags = {"pet","fake pet","fake","pvm","fake follower"}
 )
 public class FakePetPlugin extends Plugin
 {
@@ -103,7 +97,6 @@ public class FakePetPlugin extends Plugin
 		overlayManager.remove(overlayPet);
 		eventBus.register(fakeDialogManager);
 		clientToolbar.removeNavigation(navButton);
-
 	}
 
 	@Provides
@@ -113,9 +106,8 @@ public class FakePetPlugin extends Plugin
 	}
 
 	private int lastActorOrientation;
-	public int gameTickCutSceneStart;
 
-	public String message;
+	//public String message;
 
 	private boolean dialogOpen;
 	private boolean petFollowing = false;
@@ -296,12 +288,12 @@ public class FakePetPlugin extends Plugin
 	public void onClientTick(ClientTick event)
 	{
 
-		if (cutScene)
-		{
-			double intx = wizard.getWorldLocation().toWorldArea().getX() - pet.getWorldLocation().toWorldArea().getX();
-			double inty = wizard.getWorldLocation().toWorldArea().getY() - pet.getWorldLocation().toWorldArea().getY();
-			wizard.rotateObject(intx,inty);
-		}
+//		if (cutScene)
+//		{
+//			double intx = wizard.getWorldLocation().toWorldArea().getX() - pet.getWorldLocation().toWorldArea().getX();
+//			double inty = wizard.getWorldLocation().toWorldArea().getY() - pet.getWorldLocation().toWorldArea().getY();
+//			wizard.rotateObject(intx,inty);
+//		}
 
 
 		if (pet.getRlObject() != null && pet.animationPoses != null)
@@ -443,12 +435,14 @@ public class FakePetPlugin extends Plugin
 
 		if (event.getMenuEntry().getType() == MenuAction.RUNELITE && event.getMenuTarget().contains(petData.getName()) && event.getMenuOption().equals("Talk-to"))
 		{
-			if (pet.isActive() && pet.getWorldArea().isInMeleeDistance(client.getLocalPlayer().getWorldArea()))
+
+			if (pet.isActive() && pet.getWorldArea().distanceTo(client.getLocalPlayer().getWorldArea()) <= 1)
 			{
 				dialogOpen = true;
 				fakeDialogManager.open(provideDialog());
 				//fakeDialogManager.open(dialogProvider.CALL_THE_WIZARD);
 			}
+
 		}
 
 		if (!event.getMenuTarget().contains(petData.getName()) && !event.getMenuOption().equals("Continue") && dialogOpen)

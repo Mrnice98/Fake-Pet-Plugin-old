@@ -50,11 +50,11 @@ public class PetOverlay extends Overlay
 
             graphics.setFont(FontManager.getRunescapeBoldFont());
 
-            if (plugin.wizard.getRlObject() != null && plugin.cutScene && plugin.wizard.isActive())
-            {
-                Point canvasPoint2 = Perspective.getCanvasTextLocation(client,graphics,plugin.wizard.getLocalLocation(),plugin.message,client.getLocalPlayer().getLogicalHeight());
-                OverlayUtil.renderTextLocation(graphics,canvasPoint2,plugin.message,Color.YELLOW);
-            }
+//            if (plugin.wizard.getRlObject() != null && plugin.cutScene && plugin.wizard.isActive())
+//            {
+//                Point canvasPoint2 = Perspective.getCanvasTextLocation(client,graphics,plugin.wizard.getLocalLocation(),plugin.message,client.getLocalPlayer().getLogicalHeight());
+//                OverlayUtil.renderTextLocation(graphics,canvasPoint2,plugin.message,Color.YELLOW);
+//            }
 
         }
 
